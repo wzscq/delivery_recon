@@ -1,0 +1,14 @@
+{
+    "service":{
+        "port":"localhost:9903"
+    },
+    "runtime":{
+        "goMaxProcs":10
+    },
+    "crv":{
+        "server":"http://127.0.0.1:8200",
+        "user":"test",
+        "password":"",
+        "appID":"delivery_recon"
+    }
+}
