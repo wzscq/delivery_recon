@@ -6,7 +6,7 @@
         "goMaxProcs":10
     },
     "crv":{
-        "server":"http://127.0.0.1:8200",
+        "server":"http://192.168.1.144:8070/crvframeservice/",
         "user":"test",
         "password":"",
         "appID":"delivery_recon"
