@@ -7,29 +7,50 @@ import (
 	"log"
 	"github.com/xuri/excelize/v2"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 type CDNColumn struct {
 	Field string
 	Header string
+	Type int  //0 common 1 key
+	ValueType int //0 string 1 number
 }
 
-var CDNColumns = []CDNColumn{
-	{ Header:"Sold-To Party",Field:"sold_to_party"},
-	{ Header:"customer name(zh)",Field:"customer_name_zh"},
-	{ Header:"Billing Date",Field:"billing_date"},
-	{ Header:"Billing Document",Field:"billing_document"},
-	{ Header:"Item",Field:"item"},
-	{ Header:"Billing Type",Field:"billing_type"},
-	{ Header:"Delivery",Field:"delivery"},
-	{ Header:"Material",Field:"material"},
-	{ Header:"Material Description",Field:"material_description"},
-	{ Header:"Billed Quantity",Field:"quantity"},
-	{ Header:"Document Currency",Field:"document_currency"},
-	{ Header:"Net value",Field:"amount"},
-	{ Header:"Original unit price原始未税单价",Field:"price"},
-	{ Header:"New unit price新未税单价",Field:"adjusted_price"},
-	{ Header:"Net diff value差异金额",Field:"adjusted_amount"},
+var CDNColumnsAmount = []CDNColumn{
+	{ Header:"Sold-To Party",Field:"sold_to_party",Type:0,ValueType:0},
+	{ Header:"customer name(zh)",Field:"customer_name_zh",Type:0,ValueType:0},
+	{ Header:"Billing Date",Field:"billing_date",Type:0,ValueType:0},
+	{ Header:"Billing Document",Field:"billing_document",Type:0,ValueType:0},
+	{ Header:"Item",Field:"item",Type:0,ValueType:0},
+	{ Header:"Billing Type",Field:"billing_type",Type:0,ValueType:0},
+	{ Header:"Delivery",Field:"delivery",Type:0,ValueType:0},
+	{ Header:"Material",Field:"material",Type:0,ValueType:0},
+	{ Header:"Material Description",Field:"material_description",Type:0,ValueType:0},
+	{ Header:"Billed Quantity",Field:"quantity",Type:0,ValueType:1},
+	{ Header:"Document Currency",Field:"document_currency",Type:0,ValueType:0},
+	{ Header:"Net value",Field:"amount",Type:0,ValueType:1},
+	{ Header:"Original unit price原始未税单价",Field:"price",Type:1,ValueType:1},
+	{ Header:"New unit price新未税单价",Field:"adjusted_price",Type:1,ValueType:1},
+	{ Header:"Net diff value差异金额",Field:"amount_diff",Type:1,ValueType:1},
+}
+
+var CDNColumnsQuantity = []CDNColumn{
+	{ Header:"Sold-To Party",Field:"sold_to_party",Type:0,ValueType:0},
+	{ Header:"customer name(zh)",Field:"customer_name_zh",Type:0,ValueType:0},
+	{ Header:"Billing Date",Field:"billing_date",Type:0,ValueType:0},
+	{ Header:"Billing Document",Field:"billing_document",Type:0,ValueType:0},
+	{ Header:"Item",Field:"item",Type:0,ValueType:0},
+	{ Header:"Billing Type",Field:"billing_type",Type:0,ValueType:0},
+	{ Header:"Delivery",Field:"delivery",Type:0,ValueType:0},
+	{ Header:"Material",Field:"material",Type:0,ValueType:0},
+	{ Header:"Material Description",Field:"material_description",Type:0,ValueType:0},
+	{ Header:"Billed Quantity",Field:"quantity",Type:0,ValueType:1},
+	{ Header:"Document Currency",Field:"document_currency",Type:0,ValueType:0},
+	{ Header:"Net value",Field:"amount",Type:0,ValueType:1},
+	{ Header:"Delivery quantity",Field:"delivery_quantity",Type:1,ValueType:1},
+	{ Header:"Billing quantity",Field:"billing_quantity",Type:1,ValueType:1},
+	{ Header:"Quantity diff",Field:"quantity_gap",Type:1,ValueType:1},
 }
 
 var QueryFields = []map[string]interface{}{
@@ -37,11 +58,20 @@ var QueryFields = []map[string]interface{}{
 	{"field": "version"},
 	{"field": "quantity_adjusted"},
 	{"field": "price_adjusted"},
+	{"field": "delivery_quantity"},
+	{"field": "billing_quantity"},
+	{"field": "quantity_gap"},
 	{
 		"field":"billings",
 		"fieldType":"one2many",
 		"relatedModelID":"dr_billing_recon",
 		"relatedField":"match_group",
+		"sorter":[]map[string]interface{}{
+			{
+				"field":"priority",
+				"order":"desc",
+			},
+		},
 		"fields":[]map[string]interface{}{
 			{"field":"match_group"},
 			{"field":"sold_to_party"},
@@ -61,6 +91,7 @@ var QueryFields = []map[string]interface{}{
 			{"field":"item"},
 			{"field":"delivery"},
 			{"field":"document_currency"},
+			{"field":"amount_diff"},
 		},
   },
 	{
@@ -70,6 +101,15 @@ var QueryFields = []map[string]interface{}{
 		"relatedField":"match_group",
 		"fields":[]map[string]interface{}{
 				{"field":"match_group"},
+				{"field":"sold_to_party"},
+				{"field":"billing_date"},
+				{"field":"billing_type"},
+				{"field":"material_description"},
+				{"field":"customer_name_zh"},
+				{"field":"billing_document"},
+				{"field":"document_currency"},
+				{"field":"item"},
+				{"field":"delivery"},
 				{"field":"price"},
 				{"field":"quantity"},
 				{"field":"amount"},
@@ -77,6 +117,9 @@ var QueryFields = []map[string]interface{}{
 				{"field":"material"},
 				{"field":"source_id"},
 				{"field":"adjust_by"},
+				{"field":"adjusted_amount"},
+				{"field":"adjusted_price"},
+				{"field":"amount_diff"},
 		},
   },
 }
@@ -88,11 +131,82 @@ var borderStyle=[]excelize.Border{
 	{Type: "right", Color: "000000", Style: 1},
 }
 
-func exportCDN(
+var commonTitleStyle=excelize.Style{
+	Border: borderStyle,
+	Alignment:&excelize.Alignment{
+		Horizontal:"center",
+		Vertical:"center",
+		WrapText: true,
+	},
+	Font:&excelize.Font {
+		Size:12,
+		Bold:false,
+	},
+	Fill:excelize.Fill{
+		Pattern:1,
+		Color:[]string{"aaaaaa",},
+		Type:"pattern",
+	},
+}
+
+var keyTitleStyle=excelize.Style{
+	Border: borderStyle,
+	Alignment:&excelize.Alignment{
+		Horizontal:"center",
+		Vertical:"center",
+		WrapText: true,
+	},
+	Font:&excelize.Font {
+		Size:12,
+		Bold:false,
+	},
+	Fill:excelize.Fill{
+		Pattern:1,
+		Color:[]string{"FFFF00",},
+		Type:"pattern",
+	},
+}
+
+var ValueStyle=excelize.Style{
+	Border: borderStyle,
+	Alignment:&excelize.Alignment{
+		Horizontal:"left",
+		Vertical:"center",
+	},
+	Font:&excelize.Font {
+		Size:12,
+		Bold:false,
+	},
+}
+
+var ValueNumberStyle=excelize.Style{
+	Border: borderStyle,
+	Alignment:&excelize.Alignment{
+		Horizontal:"right",
+		Vertical:"center",
+	},
+	Font:&excelize.Font {
+		Size:12,
+		Bold:false,
+	},
+	NumFmt:4,
+}
+
+var adjustedFilter = map[string]interface{}{
+	"Op.or":[]map[string]interface{}{
+		map[string]interface{}{
+			"quantity_adjusted":"1",
+		},
+		map[string]interface{}{
+			"price_adjusted":"1",
+		},
+	},
+}
+
+func queryData(
 	req *crvClient.CommonReq,
 	header *crvClient.CommonHeader,
-	crvClient *crvClient.CRVClient,
-	c *gin.Context)(*common.CommonRsp){
+	crvClient *crvClient.CRVClient)(*common.CommonRsp){
 	if req.SelectedRowKeys!=nil && len(*req.SelectedRowKeys)>0 {
 		filter:=&map[string]interface{}{
 			"id":map[string]interface{}{
@@ -103,9 +217,180 @@ func exportCDN(
 		req.FilterData=nil
 	}
 
+	if req.Filter != nil {
+		req.Filter=&map[string]interface{}{
+			"Op.and":[]map[string]interface{}{
+				*req.Filter,
+				adjustedFilter,
+			},
+		}
+	} else {
+		req.Filter=&adjustedFilter
+	}
+
 	req.Fields=&QueryFields
-	rsp,_:=crvClient.Query(req,header)
+	return crvClient.Query(req,header)
+}
+
+func exportCDNPriceRow(
+	f *excelize.File,
+	sheetName string,
+	rowMap map[string]interface{},
+	sheetRow,styleValue,styleNumberValue int){
+	for colNo,col:=range(CDNColumnsAmount){
+		if len(col.Field)>0 {
+			value,ok:=rowMap[col.Field]
+			if ok && value != nil {
+				cellStart,_:=excelize.CoordinatesToCellName(colNo+1, sheetRow)
+				//f.SetCellStr(sheetName,cellStart,value.(string))	
+				if col.ValueType == 0 {
+					f.SetCellValue(sheetName,cellStart,value)
+					f.SetCellStyle(sheetName,cellStart,cellStart,styleValue)
+				} else {
+					floatNum, _ := strconv.ParseFloat(value.(string), 64)
+					f.SetCellValue(sheetName,cellStart,floatNum)
+					f.SetCellStyle(sheetName,cellStart,cellStart,styleNumberValue)
+				}
+			}
+		}
+	}
+}
+
+func exportCDNQuantityRow(
+	f *excelize.File,
+	sheetName string,
+	rowMap map[string]interface{},
+	sheetRow,styleValue,styleNumberValue int){
+	for colNo,col:=range(CDNColumnsQuantity){
+		if len(col.Field)>0 {
+			value,ok:=rowMap[col.Field]
+			if ok && value != nil {
+				cellStart,_:=excelize.CoordinatesToCellName(colNo+1, sheetRow)
+				//f.SetCellStr(sheetName,cellStart,value.(string))	
+				if col.ValueType == 0 {
+					f.SetCellValue(sheetName,cellStart,value)
+					f.SetCellStyle(sheetName,cellStart,cellStart,styleValue)
+				} else {
+					floatNum, _ := strconv.ParseFloat(value.(string), 64)
+					f.SetCellValue(sheetName,cellStart,floatNum)
+					f.SetCellStyle(sheetName,cellStart,cellStart,styleNumberValue)
+				}
+			}
+		}
+	}
+}
+
+func exportCDNQuantity(
+	queryRsp *common.CommonRsp,
+	f *excelize.File,
+	styleCommonTitle,styleKeyTitle,styleValue,styleNumberValue int){
+	sheetName:="调整数量"
+	f.SetActiveSheet(f.NewSheet(sheetName))
+
+	sheetRow:=1
+	f.SetColWidth(sheetName, "A", "O", 20)
+	//写入标题行
+	for colNo,col:=range(CDNColumnsQuantity){
+		cellStart,_:=excelize.CoordinatesToCellName(colNo+1, sheetRow)
+		f.SetCellStr(sheetName,cellStart,col.Header)	
+		if col.Type == 0 {
+			f.SetCellStyle(sheetName,cellStart,cellStart,styleCommonTitle)
+		} else {
+			f.SetCellStyle(sheetName,cellStart,cellStart,styleKeyTitle)
+		}
+	}
+	f.SetRowHeight(sheetName,sheetRow,45)
+	sheetRow++
+
+	list,_:=queryRsp.Result.(map[string]interface{})["list"]
+	records,_:=list.([]interface{})
+
+	for _,groupRow:=range(records) {
+		quantityAdjusted,_:=groupRow.(map[string]interface{})["quantity_adjusted"].(string)
+		if quantityAdjusted == "1" {
+			billings,_:=groupRow.(map[string]interface{})["billings"].(map[string]interface{})
+			billingList,hasBillingList:=billings["list"].([]interface{})
+			if hasBillingList {
+				//输出汇总数据
+				exportCDNQuantityRow(f,sheetName,groupRow.(map[string]interface{}),sheetRow,styleValue,styleNumberValue)
+				//输出billing
+				for _,billingRow:=range(billingList) {
+					rowMap:=billingRow.(map[string]interface{})
+					exportCDNQuantityRow(f,sheetName,rowMap,sheetRow,styleValue,styleNumberValue)
+					sheetRow++
+				}
+			} else {
+				log.Println("no billings list")
+			}
+		}
+	}
+}
+
+func exportCDNPrice(
+	queryRsp *common.CommonRsp,
+	f *excelize.File,
+	styleCommonTitle,styleKeyTitle,styleValue,styleNumberValue int){
+	sheetName:="调整单价"
+	f.SetActiveSheet(f.NewSheet(sheetName))
 	
+	sheetRow:=1
+	f.SetColWidth(sheetName, "A", "O", 20)
+	//写入标题行
+	for colNo,col:=range(CDNColumnsAmount){
+		cellStart,_:=excelize.CoordinatesToCellName(colNo+1, sheetRow)
+		f.SetCellStr(sheetName,cellStart,col.Header)	
+		if col.Type == 0 {
+			f.SetCellStyle(sheetName,cellStart,cellStart,styleCommonTitle)
+		} else {
+			f.SetCellStyle(sheetName,cellStart,cellStart,styleKeyTitle)
+		}
+	}
+	f.SetRowHeight(sheetName,sheetRow,45)
+	sheetRow++
+
+	list,_:=queryRsp.Result.(map[string]interface{})["list"]
+	records,_:=list.([]interface{})
+
+	for _,groupRow:=range(records) {
+		priceAdjusted,_:=groupRow.(map[string]interface{})["price_adjusted"].(string)
+		if priceAdjusted == "1" {
+			billings,hasBillings:=groupRow.(map[string]interface{})["billings"].(map[string]interface{})
+			adjustments,hasAdjustments:=groupRow.(map[string]interface{})["adjustments"].(map[string]interface{})
+			if hasBillings && hasAdjustments {
+				billingList,hasBillingList:=billings["list"].([]interface{})
+				adjustmentsList,hasAdjustmentList:=adjustments["list"].([]interface{})
+				if hasBillingList && hasAdjustmentList  {
+					//输出billing
+					for _,billingRow:=range(billingList) {
+						rowMap:=billingRow.(map[string]interface{})
+						exportCDNPriceRow(f,sheetName,rowMap,sheetRow,styleValue,styleNumberValue)
+						sheetRow++
+					}
+					//输出调整项中的zv60行
+					for _,adjustmentRow:=range(adjustmentsList) {
+						rowMap:=adjustmentRow.(map[string]interface{})
+						if rowMap["sales_document_type"].(string) == "ZV60" {
+							exportCDNPriceRow(f,sheetName,rowMap,sheetRow,styleValue,styleNumberValue)
+							sheetRow++
+						}
+					}
+				} else {
+					log.Println("no billings list")
+				}
+			} else {
+				log.Println("no billings")
+			}
+		}
+	}
+}
+
+func exportCDN(
+	req *crvClient.CommonReq,
+	header *crvClient.CommonHeader,
+	crvClient *crvClient.CRVClient,
+	c *gin.Context)(*common.CommonRsp){
+	
+	rsp:=queryData(req,header,crvClient)
 	if rsp.Error==true {
 		jsonStr, _:= json.MarshalIndent(rsp, "", "    ")
 		log.Println(string(jsonStr))
@@ -113,94 +398,20 @@ func exportCDN(
 	}
 
 	f := excelize.NewFile()
+	styleCommonTitle, _ := f.NewStyle(&commonTitleStyle)
+	styleKeyTitle,_:=f.NewStyle(&keyTitleStyle)
+	styleValue,_:=f.NewStyle(&ValueStyle)
+	styleNumberValue,_:=f.NewStyle(&ValueNumberStyle)
 
-	styleTitle, _ := f.NewStyle(&excelize.Style{
-		Border: borderStyle,
-		Alignment:&excelize.Alignment{
-			Horizontal:"center",
-			Vertical:"center",
-			WrapText: true,
-		},
-		Font:&excelize.Font {
-			Size:12,
-			Bold:false,
-		},
-		Fill:excelize.Fill{
-			Pattern:1,
-			Color:[]string{"aaaaaa",},
-			Type:"pattern",
-		},
-	})
-
-	styleValue,_:=f.NewStyle(&excelize.Style{
-		Border: borderStyle,
-		Alignment:&excelize.Alignment{
-			Horizontal:"left",
-			Vertical:"center",
-		},
-		Font:&excelize.Font {
-			Size:12,
-			Bold:false,
-		},
-	})
-
+	exportCDNQuantity(rsp,f,styleCommonTitle,styleKeyTitle,styleValue,styleNumberValue)
+	exportCDNPrice(rsp,f,styleCommonTitle,styleKeyTitle,styleValue,styleNumberValue)
+	
 	f.DeleteSheet("Sheet1")
-	sheetName:="调整记录"
-    f.SetActiveSheet(f.NewSheet(sheetName))
-	sheetRow:=1
-	f.SetColWidth(sheetName, "A", "O", 20)
-	//写入标题行
-	for colNo,col:=range(CDNColumns){
-		cellStart,_:=excelize.CoordinatesToCellName(colNo+1, sheetRow)
-		f.SetCellStr(sheetName,cellStart,col.Header)	
-		f.SetCellStyle(sheetName,cellStart,cellStart,styleTitle)
-	}
-	f.SetRowHeight(sheetName,sheetRow,45)
-	sheetRow++
-
-	list,_:=rsp.Result.(map[string]interface{})["list"]
-	records,_:=list.([]interface{})
-
-	for _,groupRow:=range(records) {
-		billings,hasBillings:=groupRow.(map[string]interface{})["billings"].(map[string]interface{})
-		adjustments,hasAdjustments:=groupRow.(map[string]interface{})["adjustments"].(map[string]interface{})
-		if hasBillings && hasAdjustments {
-			billingList,hasBillingList:=billings["list"].([]interface{})
-			_,hasAdjustmentList:=adjustments["list"].([]interface{})
-			if hasBillingList && hasAdjustmentList  {
-				for _,billingRow:=range(billingList) {
-					rowMap:=billingRow.(map[string]interface{})
-					for colNo,col:=range(CDNColumns){
-						if len(col.Field)>0 {
-							value,ok:=rowMap[col.Field]
-							if ok && value != nil {
-								cellStart,_:=excelize.CoordinatesToCellName(colNo+1, sheetRow)
-								f.SetCellStr(sheetName,cellStart,value.(string))	
-								f.SetCellStyle(sheetName,cellStart,cellStart,styleValue)
-							}
-						}
-					}
-					sheetRow++
-				}
-			} else {
-				log.Println("no billings list")
-			}
-		} else {
-			log.Println("no billings")
-		}
-	}
-
-	//文件写入测试文件
-	//if err := f.SaveAs("exportCDN.xlsx"); err != nil {
-    //    log.Println(err)
-    //}
-
 	c.Header("Content-Type", "application/octet-stream")
     c.Header("Content-Disposition", "attachment; filename=cdn.xlsx")
     c.Header("Content-Transfer-Encoding", "binary")
 	f.Write(c.Writer)
 
-	
 	return nil
 }
 

@@ -48,6 +48,12 @@ const queryFields=[
         fieldType:"one2many",
         relatedModelID:"dr_billing_recon",
         relatedField:"match_group",
+        sorter:[
+			{
+				field:"priority",
+				order:"desc"
+			}
+        ],
         fields:[
             {field:'match_group'},
             {field:"price"},
@@ -72,6 +78,7 @@ const queryFields=[
             {field:"amount"},
             {field:"sales_document_type"},
             {field:"material"},
+            {field:"set_material"},
             {field:"source_id"},
             {field:"adjust_by"}
         ]

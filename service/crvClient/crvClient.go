@@ -174,14 +174,16 @@ func (crv *CRVClient)Save(commonReq *CommonReq,header *CommonHeader)(*common.Com
 	return &commonRsp,common.ResultSuccess
 }
 
-func (crv *CRVClient)Query(commonReq *CommonReq,header *CommonHeader)(*common.CommonRsp,int){
-	log.Println("start CRVClient query ...")
+func (crv *CRVClient)Query(commonReq *CommonReq,header *CommonHeader)(*common.CommonRsp){
 	postJson,_:=json.Marshal(*commonReq)
 	postBody:=bytes.NewBuffer(postJson)
 	req,err:=http.NewRequest("POST",crv.Server+URL_QUERY,postBody)
 	if err != nil {
 		log.Println("CRVClient query NewRequest error",err)
-		return nil,common.ResultQueryRequestError
+		params:=map[string]interface{}{
+			"error message":err.Error(),
+		}
+		return common.CreateResponse(common.CreateError(common.ResultQueryRequestError,params),nil)
 	}
 	
 	if len(header.Token)>0 {
@@ -196,13 +198,16 @@ func (crv *CRVClient)Query(commonReq *CommonReq,header *CommonHeader)(*common.Co
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		log.Println("CRVClient query Do request error",err)
-		return nil,common.ResultQueryRequestError
+		params:=map[string]interface{}{
+			"error message":err.Error(),
+		}
+		return common.CreateResponse(common.CreateError(common.ResultQueryRequestError,params),nil)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 { 
 		log.Println("CRVClient query StatusCode error",resp)
-		return nil,common.ResultQueryRequestError
+		return common.CreateResponse(common.CreateError(common.ResultQueryRequestError,nil),nil)
 	}
 
 	decoder := json.NewDecoder(resp.Body)
@@ -210,14 +215,12 @@ func (crv *CRVClient)Query(commonReq *CommonReq,header *CommonHeader)(*common.Co
 	err = decoder.Decode(&commonRsp)
 	if err != nil {
 		log.Println("CRVClient query result decode failed [Err:%s]", err.Error())
-		return nil,common.ResultQueryRequestError
+		params:=map[string]interface{}{
+			"error message":err.Error(),
+		}
+		return common.CreateResponse(common.CreateError(common.ResultQueryRequestError,params),nil)
 	}
-
-	//resultJson,_:=json.Marshal(&commonRsp.Result)
-	//log.Println(string(resultJson))
-
-	log.Println("end CRVClient query success")
-	return &commonRsp,common.ResultSuccess
+	return &commonRsp
 }
 
 

@@ -372,10 +372,19 @@ export default function Content({list}){
     });
     deliveryData=deliveryData.sort((a,b)=>b.delivery_quantity-a.delivery_quantity);
     const maxDeliveryQuantity=deliveryData[0].delivery_quantity;
+    const minQuantity=deliveryData[1]?.delivery_quantity;
     let amount_diff=(totalDeliveryAmount-totalBilling.billing_amount).toFixed(2);
     let quantity_diff=(maxDeliveryQuantity-totalBilling.billing_quantity).toFixed(2);
     if(quantity_diff>-0.001 && quantity_diff<0.001){
         quantity_diff=0.00;
+    }
+
+    let min_quantity_diff=0;
+    if(minQuantity){
+        min_quantity_diff=(minQuantity-totalBilling.billing_quantity).toFixed(2);
+        if(min_quantity_diff>-0.001 && min_quantity_diff<0.001){
+            min_quantity_diff=0.00;
+        }
     }
 
     if(amount_diff>-0.001 && amount_diff<0.001){
@@ -394,13 +403,17 @@ export default function Content({list}){
     
     const adjustTotal={
         quantity:0,
+        minQuantity:0,
         amount:0,
         children:list[0].adjustments?list[0].adjustments.list:[]
     };
     list[0].adjustments?.list.forEach(row=>{
-        adjustTotal.quantity=adjustTotal.quantity+parseFloat(row.quantity);
+        if(row.set_material===null){
+            adjustTotal.quantity=adjustTotal.quantity+parseFloat(row.quantity);
+        }
+        adjustTotal.minQuantity=adjustTotal.minQuantity+parseFloat(row.quantity);
         adjustTotal.amount=adjustTotal.amount+parseFloat(row.amount);
-    })
+    });
 
     adjustTotal.quantity=adjustTotal.quantity.toFixed(2);
     adjustTotal.amount=adjustTotal.amount.toFixed(2);
@@ -413,6 +426,14 @@ export default function Content({list}){
 
     if(resultQuantity>-0.001 && resultQuantity<0.001){
         resultQuantity=0.00;
+    }
+
+    let resultMinQuantity=0;
+    if(minQuantity){
+        resultMinQuantity=(min_quantity_diff-adjustTotal.minQuantity).toFixed(2);
+        if(resultMinQuantity>-0.001 && resultMinQuantity<0.001){
+            resultMinQuantity=0.00;
+        }
     }
 
     return (
@@ -468,7 +489,7 @@ export default function Content({list}){
             </div>
             <div className="result">
                 <div>调整后汇总信息：</div>
-                <div>数量差异：<span style={{color:resultQuantity===0?'green':'red'}}>{(resultQuantity+'').replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</span></div>
+                <div>数量差异：<span style={{color:resultQuantity===0&&resultMinQuantity===0?'green':'red'}}>{(resultQuantity+'').replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{minQuantity?" , ":""}{minQuantity?((resultMinQuantity+'').replace(/\B(?=(\d{3})+(?!\d))/g, ',')):""}</span></div>
                 <div>金额差异：<span style={{color:resultAmount===0?'green':'red'}}>{(resultAmount+'').replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</span></div>
             </div>
         </div>
