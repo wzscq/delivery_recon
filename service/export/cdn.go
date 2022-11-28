@@ -66,6 +66,10 @@ var QueryFields = []map[string]interface{}{
 		"fieldType":"one2many",
 		"relatedModelID":"dr_billing_recon",
 		"relatedField":"match_group",
+		"pagination":map[string]interface{}{
+			"pageSize":10000,
+			"current":1,
+		},
 		"sorter":[]map[string]interface{}{
 			{
 				"field":"priority",
@@ -99,6 +103,10 @@ var QueryFields = []map[string]interface{}{
 		"fieldType":"one2many",
 		"relatedModelID":"dr_delivery_billing_adjustment",
 		"relatedField":"match_group",
+		"pagination":map[string]interface{}{
+			"pageSize":10000,
+			"current":1,
+		},
 		"fields":[]map[string]interface{}{
 				{"field":"match_group"},
 				{"field":"sold_to_party"},
