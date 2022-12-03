@@ -1,0 +1,6 @@
+.page-loading-main {
+    width: 100%;
+    height: calc(100vh - 41px);
+    padding-top: 45vh;
+    text-align: center;
+}

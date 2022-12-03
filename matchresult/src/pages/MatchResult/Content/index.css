@@ -1,0 +1,42 @@
+.match-result-content {
+    width: 100%;
+    height: calc(100vh - 40px );
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #EFEFEF;
+    padding-top: 5px;
+}
+
+.match-result-content-grid {
+    width:1000px;
+    margin-left: auto;
+    margin-right: auto;
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows:minmax(30px, auto);
+    padding: 20px;
+    background-color: white;
+}
+
+.match-result-content-grid .title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: thin;
+    border-bottom: 1.5px solid #EEEEEE;
+}
+
+.match-result-content-grid .label {
+    padding-left: 60px !important;
+    text-align: left;
+}
+
+.match-result-content-grid .value {
+    padding-right: 60px !important;
+    text-align: right;
+}
+
+.match-result-content-grid .percent {
+    width: 50px;
+    display: inline-block;
+    color: cornflowerblue;
+}
