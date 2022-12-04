@@ -5,6 +5,7 @@
     overflow-y: auto;
     background-color: #EFEFEF;
     padding-top: 5px;
+    padding-bottom: 15px;
 }
 
 .match-result-content-grid {
