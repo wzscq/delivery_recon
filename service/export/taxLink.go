@@ -173,6 +173,7 @@ func queryTaxLindData(
 		req.Filter=&adjustedFilter
 	}
 
+	req.ModelID="dr_delivery_billing_recon_group"
 	req.Fields=&TaxLinkQueryFields
 	return crvClient.Query(req,header)
 }

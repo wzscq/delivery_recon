@@ -10,6 +10,6 @@
         "server":"http://localhost:8200",
         "user":"test",
         "password":"",
-        "appID":"delivery_recon"
+        "appID":"delivery_recon_test"
     }
 }

@@ -9,17 +9,17 @@ if [ ! -e package/web ]; then
 fi
 
 echo build the code ...
-cd ../matchresult
+cd ../dr_console
 npm install
 sed -i  's/host=\"*.*\"/host=\"\"/' ./public/index.html
 npm run build
 cd ../build
 
 echo remove last package if exist
-if [ -e package/web/matchresult ]; then
-  rm -rf package/web/matchresult
+if [ -e package/web/dr_console ]; then
+  rm -rf package/web/dr_console
 fi
 
-mv ../matchresult/build ./package/web/matchresult
+mv ../dr_console/build ./package/web/dr_console
 
-echo matchresult package build over.
+echo dr_console package build over.

@@ -1,0 +1,16 @@
+.main .header {
+    height: 40px;
+    width: 100%;
+    border-bottom: 1px solid #f0f0f0;
+    line-height: 20px;
+}
+
+.main .header .title {
+    text-align: left;
+    float: left;
+}
+
+.main .header .operation-bar {
+    padding: 8px;
+    float: left;
+}

@@ -236,6 +236,7 @@ func queryData(
 		req.Filter=&adjustedFilter
 	}
 
+	req.ModelID="dr_delivery_billing_recon_group"
 	req.Fields=&QueryFields
 	return crvClient.Query(req,header)
 }
