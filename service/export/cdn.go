@@ -51,6 +51,7 @@ var CDNColumnsQuantity = []CDNColumn{
 	{ Header:"Delivery quantity",Field:"delivery_quantity",Type:1,ValueType:1},
 	{ Header:"Billing quantity",Field:"billing_quantity",Type:1,ValueType:1},
 	{ Header:"Quantity diff",Field:"quantity_gap",Type:1,ValueType:1},
+	{ Header:"Amount diff",Field:"amount_by_quantity",Type:1,ValueType:1},
 }
 
 var QueryFields = []map[string]interface{}{
@@ -265,6 +266,51 @@ func exportCDNPriceRow(
 	}
 }
 
+func exportCDNQuantityGroupRow(
+	f *excelize.File,
+	sheetName string,
+	rowMap map[string]interface{},
+	sheetRow,styleValue,styleNumberValue int){
+
+	//获取数量调整的行
+	//输出调整项中的zv60行
+	var adjustRow map[string]interface{}
+	adjustments,hasAdjustments:=rowMap["adjustments"].(map[string]interface{})
+	if hasAdjustments {
+		adjustmentsList,hasAdjustmentList:=adjustments["list"].([]interface{})
+		if hasAdjustmentList {
+			for _,adjustmentRow:=range(adjustmentsList) {
+				rowMap:=adjustmentRow.(map[string]interface{})
+				if rowMap["sales_document_type"].(string) == "ZV60" {
+					adjustRow=rowMap
+					break
+				}
+			}
+		}
+	}
+
+	for colNo,col:=range(CDNColumnsQuantity){
+		if len(col.Field)>0 {
+			value,ok:=rowMap[col.Field]
+			if col.Field=="amount_by_quantity" && adjustRow!=nil {
+				value,ok=adjustRow["amount"]
+			}
+			if ok && value != nil {
+				cellStart,_:=excelize.CoordinatesToCellName(colNo+1, sheetRow)
+				//f.SetCellStr(sheetName,cellStart,value.(string))	
+				if col.ValueType == 0 {
+					f.SetCellValue(sheetName,cellStart,value)
+					f.SetCellStyle(sheetName,cellStart,cellStart,styleValue)
+				} else {
+					floatNum, _ := strconv.ParseFloat(value.(string), 64)
+					f.SetCellValue(sheetName,cellStart,floatNum)
+					f.SetCellStyle(sheetName,cellStart,cellStart,styleNumberValue)
+				}
+			}
+		}
+	}
+}
+
 func exportCDNQuantityRow(
 	f *excelize.File,
 	sheetName string,
@@ -297,7 +343,7 @@ func exportCDNQuantity(
 	f.SetActiveSheet(f.NewSheet(sheetName))
 
 	sheetRow:=1
-	f.SetColWidth(sheetName, "A", "O", 20)
+	f.SetColWidth(sheetName, "A", "P", 20)
 	//写入标题行
 	for colNo,col:=range(CDNColumnsQuantity){
 		cellStart,_:=excelize.CoordinatesToCellName(colNo+1, sheetRow)
@@ -316,12 +362,13 @@ func exportCDNQuantity(
 
 	for _,groupRow:=range(records) {
 		quantityAdjusted,_:=groupRow.(map[string]interface{})["quantity_adjusted"].(string)
+		
 		if quantityAdjusted == "1" {
 			billings,_:=groupRow.(map[string]interface{})["billings"].(map[string]interface{})
 			billingList,hasBillingList:=billings["list"].([]interface{})
 			if hasBillingList {
 				//输出汇总数据
-				exportCDNQuantityRow(f,sheetName,groupRow.(map[string]interface{}),sheetRow,styleValue,styleNumberValue)
+				exportCDNQuantityGroupRow(f,sheetName,groupRow.(map[string]interface{}),sheetRow,styleValue,styleNumberValue)
 				//输出billing
 				for _,billingRow:=range(billingList) {
 					rowMap:=billingRow.(map[string]interface{})
