@@ -1,36 +1,11 @@
 import { Table } from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { SplitPane } from "react-collapse-pane";
 import { useResizeDetector } from 'react-resize-detector';
+
+import VirtualTable from '../../../components/VirtualTable';
+
 import './index.css';
-
-const deliverFields=[
-    {field:"id"},
-    {field:"period"},
-    {field:"material"},
-    {field:"customer_material_number"},
-    {field:"po_number"},
-    {field:"price"},
-    {field:"quantity"},
-    {field:"amount"},
-    {field:"customer_id"},
-    {field:"match_status"},
-    {field:"match_failure_reason"},
-    {field:"set_material"}
-]
-
-const billingFields=[
-    {field:"id"},
-    {field:"price"},
-    {field:"quantity"},
-    {field:"amount"},
-    {field:"billing_document"},
-    {field:"sales_document_type"},
-    {field:"period"},
-    {field:"sold_to_party"},
-    {field:"material"},
-    {field:"customer_material_number"}
-]
 
 const groupDeliveryColumns=[
     {
@@ -44,7 +19,7 @@ const groupDeliveryColumns=[
         title: '数量',
         dataIndex: 'quantity',
         key: 'quantity',
-        width:100,
+        width:150,
         render:(text)=>{
             const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
             return <div className='row-number'>{value}</div>;
@@ -54,7 +29,7 @@ const groupDeliveryColumns=[
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
-        width:100,
+        width:150,
         render:(text)=>{
             const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
             return <div className='row-number'>{value}</div>;
@@ -125,7 +100,7 @@ const groupBillingColumns=[
         title: '数量',
         dataIndex: 'quantity',
         key: 'quantity',
-        width:100,
+        width:150,
         render:(text)=>{
             const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
             return <div className='row-number'>{value}</div>;
@@ -135,7 +110,7 @@ const groupBillingColumns=[
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
-        width:100,
+        width:150,
         render:(text)=>{
             const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
             return <div className='row-number'>{value}</div>;
@@ -162,7 +137,7 @@ const groupBillingColumns=[
         title: 'Billing Document',
         dataIndex: 'billing_document',
         key: 'billing_document',
-        width:130,
+        width:230,
         render:(text)=>{
             return <div >{text}</div>;
         }
@@ -171,7 +146,7 @@ const groupBillingColumns=[
         title: 'Sales Document Type',
         dataIndex: 'sales_document_type',
         key: 'sales_document_type',
-        width:160,
+        width:260,
         render:(text)=>{
             return <div>{text}</div>;
         }
@@ -197,6 +172,11 @@ const groupBillingColumns=[
 export default function Content({deliveryData,billingData}){
     //const { height:heigthLeft,ref:refLeft } = useResizeDetector();
     //const { height:heightRight,ref:refRight } = useResizeDetector();
+
+    console.log("Content Refresh");
+
+    //return (<div>Content</div>);
+
     const { height,ref } = useResizeDetector();
 
     const {selectedDelivery,setSelectedDelivery}=useState([]);
@@ -211,12 +191,12 @@ export default function Content({deliveryData,billingData}){
     };
 
     const rowSelectionDelivery = {
-        selectedDelivery,
+        selectedRowKeys:selectedDelivery,
         onChange: onSelectDeliveryChange,
     };
 
     const rowSelectionBilling = {
-        selectedBilling,
+        selectedRowKeys:selectedBilling,
         onChange: onSelectBillingChange,
     };
 
@@ -254,7 +234,7 @@ export default function Content({deliveryData,billingData}){
                 <div className='table-split' ref={ref} style={{height:'100%'}}>
                     <SplitPane dir='ltr' initialSizes={[50,50]} split="vertical" collapse={false}>
                         <div className='table-left' >
-                            <Table
+                            <VirtualTable
                                 columns={groupDeliveryColumns}
                                 dataSource={deliveryData.list}
                                 pagination={false}
@@ -267,7 +247,7 @@ export default function Content({deliveryData,billingData}){
                             />
                         </div>
                         <div className='table-right'>
-                            <Table
+                            <VirtualTable
                                 columns={groupBillingColumns}
                                 dataSource={billingData.list}
                                 pagination={false}

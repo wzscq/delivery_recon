@@ -31,3 +31,14 @@
     a、修改了匹配处理流程delivery_billing_recon
     b、修改了模型的配置dr_delivery_billing_recon_group
 2、需改了CDN导出中数据导出的逻辑，增加了由于数量差异调整的对应金额差异部分
+
+2022-12-16 一些细节更新
+1、修改了待处理比对视图的取数逻辑，确保所有公司数据都能查到  
+    dr_view_for_match         统计待匹配的数据
+2、修改了dr_console页面查询取数的逻辑
+3、listview页面跳转逻辑中增加一个参数，允许跳转页面时附带一个过滤条件
+    修改了listview
+    修改了mainframe
+4、人工比对页面允许传入默认的公司作为参数
+5、人工比对页面速度优化
+

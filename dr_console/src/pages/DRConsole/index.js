@@ -20,35 +20,39 @@ const queryFields=[
 
 const queryMatchResult=[
     {field:"id"},
+    {field:"delivery_quantity_processing"},
+    {field:"delivery_amount_processing"},
+    {field:"billing_quantity_processing"},
+    {field:"billing_amount_processing"},
+    {field:"delivery_amount_match"},
+    {field:"delivery_quantity_match"},
+    {field:"billing_quantity_match"},
+    {field:"billing_amount_match"},
     {
-        field:"customer_id",
-        fieldType:"many2one",
-        relatedModelID:"dr_view_for_match",
+        field:'match_result',
+        relatedField:"customer_id",
+        fieldType:"one2many",
+        relatedModelID:"dr_view_match_result_v2",
+        sorter:[{field:'period',order:'desc'}],
+        pagination:{current:1,pageSize:1},
         fields:[
             {field:"id"},
-            {field:"delivery_quantity_processing"},
-            {field:"delivery_amount_processing"},
-            {field:"billing_quantity_processing"},
-            {field:"billing_amount_processing"},
-            {field:"delivery_amount_match"},
-            {field:"delivery_quantity_match"},
-            {field:"billing_quantity_match"},
-            {field:"billing_amount_match"}
+            {field:"period"},
+            {field:"customer_id"},
+            {field:"delivery_quantity"},
+            {field:"billing_quantity"},
+            {field:"delivery_amount"},
+            {field:"billing_amount"},
+            {field:"quantity_gap"},
+            {field:"amount_gap"},
+            {field:"exact_match"},
+            {field:"partial_match"},
+            {field:"adjusted_quantity"},
+            {field:"adjusted_amount"},
+            {field:"not_adjusted_quantity"},
+            {field:"not_adjusted_amount"}
         ]
     },
-    {field:"period"},
-    {field:"delivery_quantity"},
-    {field:"billing_quantity"},
-    {field:"delivery_amount"},
-    {field:"billing_amount"},
-    {field:"quantity_gap"},
-    {field:"amount_gap"},
-    {field:"exact_match"},
-    {field:"partial_match"},
-    {field:"adjusted_quantity"},
-    {field:"adjusted_amount"},
-    {field:"not_adjusted_quantity"},
-    {field:"not_adjusted_amount"}
 ]
 
 export default function MatchResult(){
@@ -86,10 +90,8 @@ export default function MatchResult(){
             };
             const queryParams={
                 modelID:matchResultModel,
-                filter:{customer_id:current},
-                fields:queryMatchResult,
-                sorter:[{field:'period',order:'desc'}],
-                pagination:{current:1,pageSize:1}
+                filter:{id:current},
+                fields:queryMatchResult
             };
             console.log('sendMessageToParent1:',origin,item);
             sendMessageToParent(createQueryDataMessage(frameParams,queryParams));
@@ -101,7 +103,7 @@ export default function MatchResult(){
             {customerLoaded?(
                 <>
                     <Header/>
-                    <Content sendMessageToParent={sendMessageToParent}/>
+                    <Content sendMessageToParent={sendMessageToParent} customerID={current}/>
                 </>
             ):<PageLoading/>}      
         </div>

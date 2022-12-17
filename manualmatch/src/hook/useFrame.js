@@ -1,10 +1,10 @@
 import { useEffect,useCallback } from 'react';
 import {useSelector,useDispatch} from 'react-redux';
 
-import {setCustomerData} from '../redux/customerSlice';
+import {setCustomerData,setCurrentCustomer,setMaterial} from '../redux/customerSlice';
 import {setParam} from '../redux/frameSlice';
 //import { setDefinition } from '../redux/definitionSlice';
-import {setData} from '../redux/dataSlice';
+import {setData,resetData} from '../redux/dataSlice';
 import {setLocale} from '../redux/i18nSlice';
 
 import {
@@ -43,6 +43,9 @@ export default function useFrame(){
             if(event.data.i18n){
                 dispatch(setLocale(event.data.i18n));
             }
+            if(event.data.data?.params?.customerID){
+                dispatch(setCurrentCustomer(event.data.data?.params?.customerID));
+            }
         } else if (type===FRAME_MESSAGE_TYPE.UPDATE_DATA){
             console.log("UPDATE_DATA",event.data)
             if(dataType===DATA_TYPE.MODEL_CONF){
@@ -52,6 +55,13 @@ export default function useFrame(){
                     dispatch(setCustomerData({data}));  
                 } else {
                     dispatch(setData({data}));
+                }
+            } else if (dataType===DATA_TYPE.FRAME_PARAMS){
+                console.log("FRAME_PARAMS",data)
+                if(data.customerID){
+                    dispatch(setCurrentCustomer(data.customerID));
+                    dispatch(setMaterial(null));
+                    dispatch(resetData());
                 }
             } else {
                 console.log("update data with wrong data type:",dataType);

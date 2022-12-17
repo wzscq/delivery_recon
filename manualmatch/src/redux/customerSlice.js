@@ -16,9 +16,9 @@ export const customerSlice = createSlice({
             const {data:{list}}=action.payload;
             state.list=list;
             state.loaded=true;
-            if(list.length>0){
+            if(list.length>0&&state.current===null){
               state.current=list[0].id;
-          }
+            }
         },
         setCurrentCustomer:(state,action) => {
           state.current=action.payload;

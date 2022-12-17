@@ -51,6 +51,8 @@ export default function ManualMatch(){
     const {deliveryLoaded,billingLoaded,deliveryData,billingData}=useSelector(state=>state.data);
     const {loaded:customerLoaded,current,material}=useSelector(state=>state.customer);
 
+    console.log("ManualMatch refresh");
+
     //查询客户信息数据，填充客户下拉选择列
     useEffect(()=>{
         if(origin&&item&&customerLoaded===false){
@@ -72,14 +74,15 @@ export default function ManualMatch(){
 
     useEffect(()=>{
         //查询数据
-        const filter={};
+        
         /*if(material&&material.length>0){
             filter['Op.or']=[
                 {material:'%'+material+'%'},
                 {customer_material_number:'%'+material+'%'}
             ]
         }*/
-        if(origin&&item){
+        if(origin&&item&&customerLoaded===true){
+            const filter={};
             if(current&&current.length>0){
                 if(deliveryLoaded===false){
                     filter['customer_id']=current;
@@ -140,14 +143,14 @@ export default function ManualMatch(){
                 }
             }
         }
-    },[current,item,origin,material,deliveryLoaded,billingLoaded]);
+    },[current,item,origin,material,deliveryLoaded,customerLoaded,billingLoaded,sendMessageToParent]);
 
     return (
         <div className='main'>
             {customerLoaded?(
                 <>
                     <Header sendMessageToParent={sendMessageToParent} origin={origin} item={item}  />
-                    <Content deliveryData={deliveryData} billingData={billingData} />
+                    {deliveryLoaded===true&&billingLoaded===true?<Content deliveryData={deliveryData} billingData={billingData} />:null}
                 </>
             ):<PageLoading/>}    
         </div>

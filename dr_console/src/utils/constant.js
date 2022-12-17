@@ -84,4 +84,4 @@ export const CASCADE_TYPE={
 }
 
 export const customerModel='dr_customer';
-export const matchResultModel='dr_view_match_result_v2';
+export const matchResultModel='dr_view_for_match';

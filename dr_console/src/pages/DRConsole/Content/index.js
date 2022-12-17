@@ -47,17 +47,21 @@ const viewPartialMatch={
     title:"对账匹配分组"
 }
 
-export default function Content({sendMessageToParent}){
+export default function Content({sendMessageToParent,customerID}){
     const {list} =useSelector((state)=>state.data);
 
-    const viewDetail=({model,view,title})=>{
+    viewProcessingDelivery.filter={customer_id:customerID};
+    viewProcessingBilling.filter={sold_to_party:customerID};
+
+    const viewDetail=({model,view,title,filter})=>{
         //跳转到待处理对账单页面
         const params={
             url:"/listview/#/"+model,
             location:"tab",
             title:title,
             key:"/model/"+model,
-            view:view
+            view:view,
+            filter:filter
         }
         sendMessageToParent(createOpenMessage(params));
     }
@@ -65,11 +69,12 @@ export default function Content({sendMessageToParent}){
     const viewManualMatch=({model,view,title})=>{
         //跳转到待处理对账单页面
         const params={
-            url1:"http://localhost:9006",
-            url:"http://1.15.91.60:8050/manualmatch/",
+            url:"http://localhost:9906",
+            url1:"http://1.15.91.60:8050/manualmatch/",
             location:"tab",
             title:"手工匹配",
-            key:"/delivery_recon/manualmatch"
+            key:"/delivery_recon/manualmatch",
+            customerID:customerID
         }
         sendMessageToParent(createOpenMessage(params));
     }
@@ -146,9 +151,9 @@ export default function Content({sendMessageToParent}){
         sendMessageToParent(createOperationMessage(operation));
     }
 
-    let matchedData=list?list[0]:{};
-    const processingList=list?(list[0]?.customer_id.list):undefined;
-    const processingData=processingList?processingList[0]:{};
+    let processingData=list?list[0]:{};
+    const matchedList=processingData?.match_result?.list;
+    const matchedData=matchedList?matchedList[0]:{};
 
     let billingQuantity=matchedData?.billing_quantity?parseFloat(matchedData.billing_quantity):0;
     billingQuantity=billingQuantity+(matchedData?.adjusted_quantity?parseFloat(matchedData.adjusted_quantity):0);
