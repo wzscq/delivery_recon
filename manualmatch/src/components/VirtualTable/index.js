@@ -7,8 +7,7 @@ import { VariableSizeGrid as Grid } from 'react-window';
 import './index.css';
 
 export default function VirtualTable(props){
-  const { columns, scroll } = props;
-
+  const { columns, scroll,rowKey,rowSelection:{selectedRowKeys} } = props;
   //下面这段代码是对于没有设置宽度的列按照整体宽度的平均值设置一个列宽
   const [tableWidth, setTableWidth] = useState(0);
   const widthColumnCount = columns.filter(({ width }) => !width).length;
@@ -81,14 +80,28 @@ export default function VirtualTable(props){
         : width;
     }
 
+    //勾选某个数据行
+    const onSelectedRow=(row,selected)=>{
+      const {selectedRowKeys,onChange}=props.rowSelection;
+      let newSelectedRowKeys=[];
+      if(selected===true){
+        newSelectedRowKeys=[...selectedRowKeys,rawData[row][rowKey]];
+      } else {
+        newSelectedRowKeys=selectedRowKeys.filter(item=>item!==rawData[row][rowKey]);
+      }
+      onChange(newSelectedRowKeys);
+    }
+
     const getColumnContent=({ columnIndex, rowIndex, style })=>{
       if(columnIndex===0){
+        const isSelected=(selectedRowKeys?.find(item=>item===rawData[rowIndex][rowKey]))===rawData[rowIndex][rowKey];
+        
         return (<div
           className={classNames('virtual-table-cell','ant-table-selection-col')}
           style={style}
         >
           <div style={{width:"50px"}}>
-            <Checkbox style={{paddingLeft:"9px"}}/>
+            <Checkbox checked={isSelected} style={{paddingLeft:"9px"}} onChange={(e)=>{onSelectedRow(rowIndex,e.target.checked)}} />
           </div>
         </div>);
       }

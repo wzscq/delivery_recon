@@ -274,16 +274,18 @@ func exportCDNQuantityGroupRow(
 
 	//获取数量调整的行
 	//输出调整项中的zv60行
-	var adjustRow map[string]interface{}
+	//var adjustRow map[string]interface{}
+	var amountByQuantity float64
 	adjustments,hasAdjustments:=rowMap["adjustments"].(map[string]interface{})
 	if hasAdjustments {
 		adjustmentsList,hasAdjustmentList:=adjustments["list"].([]interface{})
 		if hasAdjustmentList {
 			for _,adjustmentRow:=range(adjustmentsList) {
 				rowMap:=adjustmentRow.(map[string]interface{})
-				if rowMap["sales_document_type"].(string) == "ZV60" {
-					adjustRow=rowMap
-					break
+				if rowMap["sales_document_type"].(string) == "ZV60" || rowMap["sales_document_type"].(string) == "ZV70" {
+					value,_:=rowMap["amount"]
+					floatNum, _:= strconv.ParseFloat(value.(string), 64)
+					amountByQuantity+=floatNum
 				}
 			}
 		}
@@ -292,8 +294,9 @@ func exportCDNQuantityGroupRow(
 	for colNo,col:=range(CDNColumnsQuantity){
 		if len(col.Field)>0 {
 			value,ok:=rowMap[col.Field]
-			if col.Field=="amount_by_quantity" && adjustRow!=nil {
-				value,ok=adjustRow["amount"]
+			if col.Field=="amount_by_quantity" {
+				value=amountByQuantity
+				ok=true
 			}
 			if ok && value != nil {
 				cellStart,_:=excelize.CoordinatesToCellName(colNo+1, sheetRow)
@@ -302,8 +305,8 @@ func exportCDNQuantityGroupRow(
 					f.SetCellValue(sheetName,cellStart,value)
 					f.SetCellStyle(sheetName,cellStart,cellStart,styleValue)
 				} else {
-					floatNum, _ := strconv.ParseFloat(value.(string), 64)
-					f.SetCellValue(sheetName,cellStart,floatNum)
+					//floatNum, _ := strconv.ParseFloat(value.(string), 64)
+					f.SetCellValue(sheetName,cellStart,value)
 					f.SetCellStyle(sheetName,cellStart,cellStart,styleNumberValue)
 				}
 			}
@@ -422,10 +425,10 @@ func exportCDNPrice(
 						exportCDNPriceRow(f,sheetName,rowMap,sheetRow,styleValue,styleNumberValue)
 						sheetRow++
 					}
-					//输出调整项中的zv60行
+					//输出调整项中的zv60和ZV70行
 					for _,adjustmentRow:=range(adjustmentsList) {
 						rowMap:=adjustmentRow.(map[string]interface{})
-						if rowMap["sales_document_type"].(string) == "ZV60" {
+						if rowMap["sales_document_type"].(string) == "ZV60" || rowMap["sales_document_type"].(string) == "ZV70" {
 							exportCDNPriceRow(f,sheetName,rowMap,sheetRow,styleValue,styleNumberValue)
 							sheetRow++
 						}

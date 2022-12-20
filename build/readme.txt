@@ -40,5 +40,20 @@
     修改了listview
     修改了mainframe
 4、人工比对页面允许传入默认的公司作为参数
-5、人工比对页面速度优化
+5、人工比对页面速度优化   ?
+
+2022-12-19 比对规则细节更新
+1、修改了billing的预处理规则 dr_billing_preprocessing_for_chery
+    a、允许ZV60参与匹配
+    b、增加了ZV37的数量和金额取负数的处理
+2、新增匹配处理规则：delivery_billing_recon_v2
+    a、允许对账单零件数大于billing中的零件数
+    b、不区分订单4和5开头
+3、对账匹配调用的流改为：delivery_billing_recon_v2
+4、新增调差处理规则：delivery_billing_recon_adjust_v2
+    a、ZV70差异调整
+5、匹配调差调用的流改为:delivery_billing_recon_adjust_v2
+6、CDN导出逻辑更新，支持ZV70导出
+
+
 

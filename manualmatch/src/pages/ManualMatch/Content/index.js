@@ -179,10 +179,11 @@ export default function Content({deliveryData,billingData}){
 
     const { height,ref } = useResizeDetector();
 
-    const {selectedDelivery,setSelectedDelivery}=useState([]);
-    const {selectedBilling,setSelectedBilling}=useState([]);
+    const [selectedDelivery,setSelectedDelivery]=useState([]);
+    const [selectedBilling,setSelectedBilling]=useState([]);
     //处理行的选中
     const onSelectDeliveryChange=selectedRowKeys => {
+        console.log('onSelectDeliveryChange',selectedRowKeys);
         setSelectedDelivery(selectedRowKeys);
     };
 
