@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import {SwapOutlined,ImportOutlined,ExportOutlined} from '@ant-design/icons';
 
 import {createOpenMessage,createOperationMessage} from '../../../utils/normalOperations';
+import {FRAME_MESSAGE_TYPE} from '../../../utils/constant';
 
 import './index.css';
 
@@ -29,11 +30,11 @@ const viewMatchBilling={
     title:"OpenBilling比对记录"
 }
 
-const viewMatchedGroup={
+/*const viewMatchedGroup={
     model:"dr_delivery_billing_recon_group",
     view:"allGroups",
     title:"对账匹配分组"
-}
+}*/
 
 const viewExactMatch={
     model:"dr_delivery_billing_recon_group",
@@ -47,11 +48,16 @@ const viewPartialMatch={
     title:"对账匹配分组"
 }
 
-export default function Content({sendMessageToParent,customerID}){
+export default function Content({sendMessageToParent,customerID,curentBatch}){
     const {list} =useSelector((state)=>state.data);
 
-    viewProcessingDelivery.filter={customer_id:customerID};
+    const import_batch_number=curentBatch?.substring(customerID.length+1,curentBatch.length);
+    
+    viewProcessingDelivery.filter={customer_id:customerID,import_batch_number:import_batch_number};
     viewProcessingBilling.filter={sold_to_party:customerID};
+
+    viewExactMatch.filter={customer_id:customerID,import_batch_number:import_batch_number};
+    viewPartialMatch.filter={customer_id:customerID,import_batch_number:import_batch_number};
 
     const viewDetail=({model,view,title,filter})=>{
         //跳转到待处理对账单页面
@@ -74,33 +80,65 @@ export default function Content({sendMessageToParent,customerID}){
             location:"tab",
             title:"手工匹配",
             key:"/delivery_recon/manualmatch",
-            customerID:customerID
+            customerID:customerID,
+            import_batch_number:import_batch_number
         }
         sendMessageToParent(createOpenMessage(params));
     }
 
     const importDelivery=()=>{
         const params={
-            url:"/formview/#/dr_delivery_statement/formImportFlow/create",
+            url:"/formview/#/dr_delivery_statement/formControlImportFlow/create",
             location:"modal",
             title:"导入客户对账单",
-            key:"/model/dr_delivery_statement/formImportFlow/create",
+            key:"/model/dr_delivery_statement/formControlImportFlow/create",
             width:600,
-            height:250
+            height:350
         }
         sendMessageToParent(createOpenMessage(params));
     }
 
     const importBilling=()=>{
         const params={
-            url:"/formview/#/dr_billing/formESI/create",
+            url:"/formview/#/dr_billing/formControlESI/create",
             location:"modal",
             title:"导入OpenBilling",
-            key:"/model/dr_billing/formESI/create",
+            key:"/model/dr_billing/formControlESI/create",
             width:600,
             height:250
         }
         sendMessageToParent(createOpenMessage(params));
+    }
+
+    const onMatch=()=>{
+        const message={
+            type:FRAME_MESSAGE_TYPE.DO_OPERATION,
+            data:{
+                operationItem:{
+                    id:"doProcessing",
+                    name:"客户对账单匹配",
+                    type:"request",
+                    params:{
+                        url:"/redirect",
+                        method:"post"
+                    },
+                    input:{
+                        to:"processingFlow",
+                        FlowID:"delivery_billing_recon_v2"
+                    },
+                    description:"提交客户对账单匹配处理",
+                    successOperation:{
+                        type:"reloadFrameData",
+                        params:{
+                            location:"tab",
+                            key:"/delivery_recon/dr_console"
+                        },
+                        description:"刷新页面数据"
+                    }
+                }
+            }
+        }
+        sendMessageToParent(message);
     }
 
     const formatNumberInt=(value)=>{
@@ -184,7 +222,7 @@ export default function Content({sendMessageToParent,customerID}){
                 <div>数量：<a onClick={()=>viewDetail(viewProcessingDelivery)}>{formatNumberInt(processingData?.delivery_quantity_processing)}</a></div> 
                 <div>金额：<a onClick={()=>viewDetail(viewProcessingDelivery)}>{formatNumber(processingData?.delivery_amount_processing)}</a></div>
                 </div>
-                <div style={{float:"right"}}><a onClick={()=>{importDelivery()}}>获取开票通知<ImportOutlined /></a></div>
+                <div style={{float:"right"}}><a onClick={()=>{importDelivery()}}>获取客户对账单<ImportOutlined /></a></div>
             </div>
             <div className="" style={{gridColumnStart:3,gridColumnEnd:4,gridRowStart:2,gridRowEnd:3}}>
                 
@@ -208,7 +246,7 @@ export default function Content({sendMessageToParent,customerID}){
                 </div>
             </div>
             <div className="" style={{gridColumnStart:3,gridColumnEnd:4,gridRowStart:3,gridRowEnd:4}}>
-                <div style={{width:"100%",textAlign:"center",lineHeight:'55px'}}><a onClick={()=>{}}><SwapOutlined /><span style={{padding:"10px"}}>点我进行匹配调差</span><SwapOutlined /></a></div>
+                <div style={{width:"100%",textAlign:"center",lineHeight:'55px'}}><a onClick={onMatch}><SwapOutlined /><span style={{padding:"10px"}}>点我进行匹配调差</span><SwapOutlined /></a></div>
             </div>
             <div className="data_block" style={{gridColumnStart:4,gridColumnEnd:5,gridRowStart:3,gridRowEnd:4}}>
                 <div style={{float:"left"}}>

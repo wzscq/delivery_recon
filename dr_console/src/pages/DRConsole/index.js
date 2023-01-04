@@ -8,6 +8,7 @@ import Header from './Header';
 
 import {
     customerModel,
+    customerBatchModel,
     matchResultModel
 } from '../../utils/constant';
 
@@ -16,6 +17,12 @@ import './index.css';
 const queryFields=[
     {field:'id'},
     {field:'name'}
+];
+
+const queryBatchFields=[
+    {field:'id'},
+    {field:'customer_id'},
+    {field:'import_batch_number'},
 ];
 
 const queryMatchResult=[
@@ -30,14 +37,12 @@ const queryMatchResult=[
     {field:"billing_amount_match"},
     {
         field:'match_result',
-        relatedField:"customer_id",
+        relatedField:"id",
         fieldType:"one2many",
         relatedModelID:"dr_view_match_result_v2",
-        sorter:[{field:'period',order:'desc'}],
         pagination:{current:1,pageSize:1},
         fields:[
             {field:"id"},
-            {field:"period"},
             {field:"customer_id"},
             {field:"delivery_quantity"},
             {field:"billing_quantity"},
@@ -59,6 +64,7 @@ export default function MatchResult(){
     const sendMessageToParent=useFrame();
     const {origin,item}=useSelector(state=>state.frame);
     const {loaded:customerLoaded,current}=useSelector(state=>state.customer);
+    const {loaded:batchLoaded,current:curentBatch}=useSelector(state=>state.batch);
     const {loaded:dataLoaded} = useSelector(state=>state.data);
 
     //查询客户信息数据，填充客户下拉选择列
@@ -80,8 +86,28 @@ export default function MatchResult(){
         }
     },[customerLoaded,origin,item,sendMessageToParent]);
 
+    //查询客户对账单批次信息，填充批次对话框
     useEffect(()=>{
-        if(current!==null&&dataLoaded===false){
+        if(origin&&item&&current!==null&&batchLoaded===false){
+            //查询客户信息
+            const frameParams={
+                frameType:item.frameType,
+                frameID:item.params.key,
+                origin:origin
+            };
+            const queryParams={
+                modelID:customerBatchModel,
+                fields:queryBatchFields,
+                filter:{customer_id:current},
+                pagination:{current:1,pageSize:500}
+            };
+            console.log('sendMessageToParent:',origin,item);
+            sendMessageToParent(createQueryDataMessage(frameParams,queryParams));
+        }
+    },[current,batchLoaded,origin,item,sendMessageToParent]);
+
+    useEffect(()=>{
+        if(curentBatch!==null&&dataLoaded===false){
             //查询统计数据客户信息
             const frameParams={
                 frameType:item.frameType,
@@ -90,20 +116,20 @@ export default function MatchResult(){
             };
             const queryParams={
                 modelID:matchResultModel,
-                filter:{id:current},
+                filter:{id:curentBatch},
                 fields:queryMatchResult
             };
             console.log('sendMessageToParent1:',origin,item);
             sendMessageToParent(createQueryDataMessage(frameParams,queryParams));
         }
-    },[current,dataLoaded,sendMessageToParent,item,origin]);
+    },[curentBatch,dataLoaded,sendMessageToParent,item,origin]);
 
     return (
         <div className='main'>
             {customerLoaded?(
                 <>
                     <Header/>
-                    <Content sendMessageToParent={sendMessageToParent} customerID={current}/>
+                    <Content sendMessageToParent={sendMessageToParent} curentBatch={curentBatch} customerID={current}/>
                 </>
             ):<PageLoading/>}      
         </div>

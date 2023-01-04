@@ -32,7 +32,7 @@ export const FRAME_MESSAGE_TYPE={
     DO_OPERATION:'doOperation',//"DO_OPERATION",
     INIT:'init',//"INIT",
     UPDATE_DATA:'updateData',//"UPDATE_DATA",
-    RELOAD_DATA:'reload_data',//"RELOAD_DATA",
+    RELOAD_DATA:'reloadData',//"RELOAD_DATA",
     QUERY_REQUEST:'queryRequest',//"QUERY_REQUEST",
     QUERY_RESPONSE:'queryResponse',//"QUERY_RESPONSE",
     GET_IMAGE:'getImage',//"GET_IMAGE",
@@ -85,3 +85,4 @@ export const CASCADE_TYPE={
 
 export const customerModel='dr_customer';
 export const matchResultModel='dr_view_for_match';
+export const customerBatchModel='dr_view_customer_import';

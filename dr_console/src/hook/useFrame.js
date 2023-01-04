@@ -3,16 +3,19 @@ import {useSelector,useDispatch} from 'react-redux';
 
 import {setParam} from '../redux/frameSlice';
 //import { setDefinition } from '../redux/definitionSlice';
-import {setData} from '../redux/dataSlice';
+import {setData,refreshData} from '../redux/dataSlice';
 import {setCustomerData} from '../redux/customerSlice';
 import {setLocale} from '../redux/i18nSlice';
+import { resetBatch, setBatchData } from '../redux/batchSlice';
 
 import {
     FRAME_MESSAGE_TYPE,
     DATA_TYPE,
     customerModel,
-    matchResultModel
+    matchResultModel,
+    customerBatchModel
 } from '../utils/constant';
+
 
 const getParentOrigin=()=>{
     const a = document.createElement("a");
@@ -50,10 +53,14 @@ export default function useFrame(){
                 //dispatch(setDefinition(data));
             } else if (dataType===DATA_TYPE.QUERY_RESULT){
                 if(data.modelID===customerModel){
-                    dispatch(setCustomerData({data}));  
+                    dispatch(setCustomerData({data}));
                 }
                 if(data.modelID===matchResultModel){
                     dispatch(setData({data}));
+                }
+                if(data.modelID===customerBatchModel){
+                    dispatch(setBatchData({data}));
+                    dispatch(refreshData());
                 }
             } else {
                 console.log("update data with wrong data type:",dataType);
@@ -61,6 +68,7 @@ export default function useFrame(){
         } else if (type===FRAME_MESSAGE_TYPE.RELOAD_DATA){
             console.log("reload data");
             //dispatch(refreshData());
+            dispatch(resetBatch());
         } else if (type===FRAME_MESSAGE_TYPE.UPDATE_LOCALE){
             console.log("UPDATE_LOCALE",event.data)
             //dispatch(setLocale(event.data.i18n));

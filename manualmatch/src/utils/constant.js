@@ -85,3 +85,4 @@ export const CASCADE_TYPE={
 }
 
 export const customerModel='dr_customer';
+export const customerBatchModel='dr_view_customer_import';

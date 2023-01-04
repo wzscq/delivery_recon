@@ -10,8 +10,10 @@ import {setLocale} from '../redux/i18nSlice';
 import {
     FRAME_MESSAGE_TYPE,
     DATA_TYPE,
-    customerModel
+    customerModel,
+    customerBatchModel
 } from '../utils/constant';
+import { resetBatch, setBatchData, setCurrentBatch } from '../redux/batchSlice';
 
 const getParentOrigin=()=>{
     const a = document.createElement("a");
@@ -46,6 +48,11 @@ export default function useFrame(){
             if(event.data.data?.params?.customerID){
                 dispatch(setCurrentCustomer(event.data.data?.params?.customerID));
             }
+            if(event.data.data?.params?.import_batch_number){
+                dispatch(setCurrentBatch(event.data.data?.params?.import_batch_number));
+                //dispatch(setMaterial(null));
+                dispatch(resetBatch());
+            }
         } else if (type===FRAME_MESSAGE_TYPE.UPDATE_DATA){
             console.log("UPDATE_DATA",event.data)
             if(dataType===DATA_TYPE.MODEL_CONF){
@@ -53,6 +60,9 @@ export default function useFrame(){
             } else if (dataType===DATA_TYPE.QUERY_RESULT){
                 if(data.modelID===customerModel){
                     dispatch(setCustomerData({data}));  
+                } else if(data.modelID===customerBatchModel){
+                    dispatch(setBatchData({data}));
+                    dispatch(resetData());
                 } else {
                     dispatch(setData({data}));
                 }
@@ -60,8 +70,9 @@ export default function useFrame(){
                 console.log("FRAME_PARAMS",data)
                 if(data.customerID){
                     dispatch(setCurrentCustomer(data.customerID));
+                    dispatch(setCurrentBatch(data.import_batch_number));
                     dispatch(setMaterial(null));
-                    dispatch(resetData());
+                    dispatch(resetBatch());
                 }
             } else {
                 console.log("update data with wrong data type:",dataType);

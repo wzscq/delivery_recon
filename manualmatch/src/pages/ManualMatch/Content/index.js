@@ -2,8 +2,10 @@ import { Table } from 'antd';
 import { useState } from 'react';
 import { SplitPane } from "react-collapse-pane";
 import { useResizeDetector } from 'react-resize-detector';
+import moment from 'moment';
 
 import VirtualTable from '../../../components/VirtualTable';
+import StatusBar from '../StatusBar';
 
 import './index.css';
 
@@ -51,6 +53,16 @@ const groupDeliveryColumns=[
         key: 'material',
         ellipsis: true,
         width:150
+    },
+    {
+        title: '收货日期',
+        dataIndex: 'delivery_date',
+        key: 'delivery_date',
+        width:130,
+        render:(text)=>{
+            const value=moment(text).format("YYYY-MM-DD");
+            return <div >{value}</div>;
+        }
     },
     {
         title: '账期',
@@ -132,6 +144,16 @@ const groupBillingColumns=[
         key: 'material',
         ellipsis: true,
         width:150
+    },
+    {
+        title: 'Billing Date',
+        dataIndex: 'billing_date',
+        key: 'billing_date',
+        width:130,
+        render:(text)=>{
+            const value=moment(text).format("YYYY-MM-DD");
+            return <div >{value}</div>;
+        }
     },
     {
         title: 'Billing Document',
@@ -227,10 +249,11 @@ export default function Content({deliveryData,billingData}){
         );
     };
 
-    const scrolly=height-70;
+    const scrolly=height-90;
 
     return (
         <div className='content'>
+            <StatusBar deliveryData={deliveryData} billingData={billingData} selectedDelivery={selectedDelivery} selectedBilling={selectedBilling}  />
             <div className="group-detail">
                 <div className='table-split' ref={ref} style={{height:'100%'}}>
                     <SplitPane dir='ltr' initialSizes={[50,50]} split="vertical" collapse={false}>

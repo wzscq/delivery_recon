@@ -1,0 +1,25 @@
+.status-bar {
+  width: 100%;
+  height: 21px;
+}
+
+.status-bar .delivery-status {
+  width: 33%;
+  float: left;
+  padding-left: 10px;
+  text-align: left;
+}
+
+.status-bar .diff-status {
+  width: 33%;
+  float: left;
+  text-align: center;
+}
+
+.status-bar .billing-status {
+  width: 33%;
+  float: right;
+  padding-right: 10px;
+  text-align: right;
+}
+
