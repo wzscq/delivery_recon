@@ -75,8 +75,8 @@ export default function Content({sendMessageToParent,customerID,curentBatch}){
     const viewManualMatch=({model,view,title})=>{
         //跳转到待处理对账单页面
         const params={
-            url:"http://localhost:9906",
-            url1:"http://1.15.91.60:8050/manualmatch/",
+            url1:"http://localhost:9906",
+            url:"http://1.15.91.60:8040/manualmatch/",
             location:"tab",
             title:"手工匹配",
             key:"/delivery_recon/manualmatch",

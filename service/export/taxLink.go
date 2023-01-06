@@ -148,6 +148,10 @@ var TaxLinkQueryFields = []map[string]interface{}{
   },
 }
 
+var confirmedFilter = map[string]interface{}{
+	"confirmed":"1",
+}
+
 func queryTaxLindData(
 	req *crvClient.CommonReq,
 	header *crvClient.CommonHeader,
@@ -166,11 +170,11 @@ func queryTaxLindData(
 		req.Filter=&map[string]interface{}{
 			"Op.and":[]map[string]interface{}{
 				*req.Filter,
-				adjustedFilter,
+				confirmedFilter,
 			},
 		}
 	} else {
-		req.Filter=&adjustedFilter
+		req.Filter=&confirmedFilter
 	}
 
 	req.ModelID="dr_delivery_billing_recon_group"
