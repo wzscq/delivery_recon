@@ -55,5 +55,20 @@
 5、匹配调差调用的流改为:delivery_billing_recon_adjust_v2
 6、CDN导出逻辑更新，支持ZV70导出
 
+2022-12-19 增加批次号功能
+1、增加视图dr_view_customer_import
+    增加视图模型配置，在数据库中创建对应视图
+2、对批次号的生成逻辑做对应修改
+3、dr_delivery_statement和dr_billing表增加sheet_name字段
+4、dr_delivery_statement配置修改，增加控制台调用的导入表单formControlImportFlow
+5、dr_billing配置修改，增加控制台调用的导入表单formControlESI
+6、dr_delivery_recon表增加字段import_batch_number、delivery_date
+7、dr_delivery_billing_recon_group表增加字段import_batch_number
+8、修改视图dr_view_for_match、dr_view_match_result_v2
+9、修改dr_delivery_statement预处理逻辑，增加对import_batch_number的处理
+10、修改formControlESI，导入和预处理集成到一个功能中，同时刷新控制台页面
+11、修改formControlImportFlow，导入和预处理集成到一个功能中，同时刷新控制台页面
+12、修改dr_consolei中匹配调差对应的流名称，新增流delivery_billing_recon_and_adjust，同时调用匹配和调差功能
+13、修改匹配流delivery_billing_recon_v2，增加对字段import_batch_number的处理
 
 

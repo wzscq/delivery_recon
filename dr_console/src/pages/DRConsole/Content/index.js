@@ -124,7 +124,7 @@ export default function Content({sendMessageToParent,customerID,curentBatch}){
                     },
                     input:{
                         to:"processingFlow",
-                        FlowID:"delivery_billing_recon_v2"
+                        FlowID:"delivery_billing_recon_and_adjust"
                     },
                     description:"提交客户对账单匹配处理",
                     successOperation:{
