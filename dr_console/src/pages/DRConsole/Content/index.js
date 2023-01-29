@@ -76,7 +76,7 @@ export default function Content({sendMessageToParent,customerID,curentBatch}){
         //跳转到待处理对账单页面
         const params={
             url1:"http://localhost:9906",
-            url:"http://1.15.91.60:8040/manualmatch/",
+            url:"http://1.15.91.60:8050/manualmatch/",
             location:"tab",
             title:"手工匹配",
             key:"/delivery_recon/manualmatch",
@@ -124,7 +124,10 @@ export default function Content({sendMessageToParent,customerID,curentBatch}){
                     },
                     input:{
                         to:"processingFlow",
-                        FlowID:"delivery_billing_recon_and_adjust"
+                        flowID:"delivery_billing_recon_and_adjust",
+                        filter:{
+                            import_batch_number:import_batch_number
+                        }
                     },
                     description:"提交客户对账单匹配处理",
                     successOperation:{

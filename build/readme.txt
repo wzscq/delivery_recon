@@ -55,7 +55,7 @@
 5、匹配调差调用的流改为:delivery_billing_recon_adjust_v2
 6、CDN导出逻辑更新，支持ZV70导出
 
-2022-12-19 增加批次号功能
+2023-01-13 增加批次号功能
 1、增加视图dr_view_customer_import
     增加视图模型配置，在数据库中创建对应视图
 2、对批次号的生成逻辑做对应修改
@@ -71,4 +71,12 @@
 12、修改dr_consolei中匹配调差对应的流名称，新增流delivery_billing_recon_and_adjust，同时调用匹配和调差功能
 13、修改匹配流delivery_billing_recon_v2，增加对字段import_batch_number的处理
 
+2023-01-14 套件匹配报错问题排查
+1、套件匹配流程修改允许billing<对账数量
+2、调差流程错误修正
+
+2023-01-29 允许跨公司销账
+1、客户信息中增加新公司33264的配置。
+2、增加跨公司匹配逻辑delivery_billing_recon_cross_customer。
+3、控制台匹配调差逻辑中批次号传递问题修复
 
