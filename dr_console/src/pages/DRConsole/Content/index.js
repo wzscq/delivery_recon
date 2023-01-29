@@ -125,6 +125,7 @@ export default function Content({sendMessageToParent,customerID,curentBatch}){
                     input:{
                         to:"processingFlow",
                         flowID:"delivery_billing_recon_and_adjust",
+                        modelID:"dr_delivery_recon",
                         filter:{
                             import_batch_number:import_batch_number
                         }
