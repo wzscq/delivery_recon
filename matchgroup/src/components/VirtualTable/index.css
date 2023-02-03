@@ -1,0 +1,11 @@
+.virtual-table-selectable .ant-table-selection-col {
+  width: 50px !important;
+}
+
+.virtual-table-cell {
+  border-right: 1px solid #f0f0f0;
+  border-bottom:  1px solid #f0f0f0;
+  overflow: hidden;
+  padding-left: 8px;
+  padding-right: 8px;
+}

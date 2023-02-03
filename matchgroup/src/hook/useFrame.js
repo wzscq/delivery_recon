@@ -4,12 +4,15 @@ import {useSelector,useDispatch} from 'react-redux';
 import {setParam} from '../redux/frameSlice';
 //import { setDefinition } from '../redux/definitionSlice';
 import {setData,refreshData} from '../redux/dataSlice';
+import {setData as setBillingData} from '../redux/billingSlice';
 import {setLocale} from '../redux/i18nSlice';
 
 import {
     FRAME_MESSAGE_TYPE,
     DATA_TYPE
 } from '../utils/constant';
+
+const groupModel='dr_delivery_billing_recon_group';
 
 const getParentOrigin=()=>{
     const a = document.createElement("a");
@@ -46,7 +49,11 @@ export default function useFrame(){
             if(dataType===DATA_TYPE.MODEL_CONF){
                 //dispatch(setDefinition(data));
             } else if (dataType===DATA_TYPE.QUERY_RESULT){
-                dispatch(setData({data}));
+                if(data.modelID===groupModel){
+                    dispatch(setData({data}));
+                } else {
+                    dispatch(setBillingData({data}));
+                }
             } else {
                 console.log("update data with wrong data type:",dataType);
             }

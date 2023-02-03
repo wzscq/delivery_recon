@@ -1,0 +1,22 @@
+.ant-modal-header {
+  padding: 8px;
+}
+
+.ant-modal-close-x {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+}
+
+.ant-modal-footer {
+  padding: 8px;
+}
+
+.ant-modal-body {
+  padding: 5px;
+}
+
+.ant-table.ant-table-small .ant-table-title, .ant-table.ant-table-small .ant-table-footer, .ant-table.ant-table-small .ant-table-thead > tr > th, .ant-table.ant-table-small .ant-table-tbody > tr > td, .ant-table.ant-table-small tfoot > tr > th, .ant-table.ant-table-small tfoot > tr > td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}

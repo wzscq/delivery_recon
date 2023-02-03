@@ -15,7 +15,17 @@ import './index.css';
 
 const queryFields=[
     {field:"id"},
-    {field:"name"}
+    {field:"name"},
+    {
+        field:"recon_customer",
+        fieldType:"one2many",
+        relatedModelID:"dr_recon_customer",
+        relatedField:"customer_id",
+        fields:[
+            {field:"customer_id"},
+            {field:"recon_customer_id"}
+        ]
+    }
 ];
 
 const queryBatchFields=[
@@ -58,7 +68,7 @@ export default function ManualMatch(){
     const sendMessageToParent=useFrame();
     const {origin,item}=useSelector(state=>state.frame);
     const {deliveryLoaded,billingLoaded,deliveryData,billingData}=useSelector(state=>state.data);
-    const {loaded:customerLoaded,current,material}=useSelector(state=>state.customer);
+    const {loaded:customerLoaded,current,material,list,withReconCustomer}=useSelector(state=>state.customer);
     const {loaded:batchLoaded,current:batchCurrent}=useSelector(state=>state.batch);
 
     console.log("ManualMatch refresh");
@@ -104,7 +114,19 @@ export default function ManualMatch(){
 
     useEffect(()=>{
         //查询数据
-        
+        const getReconCustomerFilter=(current,list)=>{
+            const currentRow=list.filter(item=>item.id===current)[0];
+            if(currentRow?.recon_customer?.list?.length>0){
+                const reconCustomers=currentRow?.recon_customer?.list.map(item=>{
+                    return item.recon_customer_id;
+                });
+                reconCustomers.push(current);
+                return {
+                    "Op.in":reconCustomers
+                };
+            }
+            return current;
+        }
         /*if(material&&material.length>0){
             filter['Op.or']=[
                 {material:'%'+material+'%'},
@@ -140,6 +162,10 @@ export default function ManualMatch(){
                 sendMessageToParent(createQueryDataMessage(frameParams,queryParams));
             } else if (billingLoaded===false){
                 filter['sold_to_party']=current;
+                //如果存在关联对账客户，且沟通选了关联对账，则过滤条件改为包含关联对账客户数据
+                if(withReconCustomer===true){
+                    filter['sold_to_party']=getReconCustomerFilter(current,list);
+                }
                 filter['match_status']={'Op.in':['0','2','3']}
                 
                 if(material&&material.length>0){

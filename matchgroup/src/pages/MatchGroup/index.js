@@ -5,11 +5,13 @@ import Content from './Content';
 import useFrame from '../../hook/useFrame';
 import PageLoading from './PageLoading';
 import {createQueryDataMessage} from '../../utils/normalOperations';
+import DialogSelectBilling from './DialogSelectBilling';
 
 import './index.css';
 
 const queryFields=[
     {field:"id"},
+    {field:"version"},
     {field:"confirmed"},
     {field:"recon_status"},
     {field:"match_result"},
@@ -67,7 +69,12 @@ const queryFields=[
             {field:"sales_document_type"},
             {field:"adjusted_amount"},
             {field:"adjusted_price"},
-            {field:"period"}
+            {field:"period"},
+            {field:"customer_material_number"},
+            {field:"material"},
+            {field:"billing_date"},
+            {field:"version"},
+            {field:"id"}
         ]
     },
     {
@@ -77,6 +84,7 @@ const queryFields=[
         relatedField:"match_group",
         fields:[
             {field:'match_group'},
+            {field:"sold_to_party"},
             {field:"price"},
             {field:"quantity"},
             {field:"amount"},
@@ -92,7 +100,7 @@ const queryFields=[
 export default function MatchGroup(){
     const sendMessageToParent=useFrame();
     const {origin,item}=useSelector(state=>state.frame);
-    const {loaded,list}=useSelector(state=>state.data);
+    const {loaded,list,showSelectBilling}=useSelector(state=>state.data);
 
     useEffect(()=>{
         if(origin&&item){
@@ -116,10 +124,54 @@ export default function MatchGroup(){
         }
     },[loaded,origin,item,sendMessageToParent]);
 
+    useEffect(()=>{
+        if(loaded===true&&showSelectBilling===true){
+          console.log("sendMessageToParent");
+          const billingFields=[
+            {field:"price"},
+            {field:"quantity"},
+            {field:"amount"},
+            {field:"billing_document"},
+            {field:"sales_document_type"},
+            {field:"adjusted_amount"},
+            {field:"adjusted_price"},
+            {field:"period"},
+            {field:"customer_material_number"},
+            {field:"material"},
+            {field:"billing_date"},
+            {field:"version"},
+            {field:"id"}
+          ];
+          //通过客户、零件筛选billing
+          const customerID=list[0].customer_id.value;
+          const material=list[0].material;
+          const filter={
+            sold_to_party:customerID,
+            customer_material_number:material,
+            match_status:{'Op.ne':'1'}
+          }
+          const modelID='dr_billing_recon';
+    
+          const frameParams={
+            frameType:item.frameType,
+            frameID:item.params.key,
+            origin:origin
+          };
+          const queryParams={
+              modelID:modelID,
+              filter:filter,
+              fields:billingFields,
+              pagination:{current:1,pageSize:100000}
+          };
+          sendMessageToParent(createQueryDataMessage(frameParams,queryParams));
+        }
+    },[loaded,showSelectBilling,origin,list,item,sendMessageToParent]);
+
     return (
         <div className='main'>
             <Header sendMessageToParent={sendMessageToParent}/>
             {loaded===false?<PageLoading/>:<Content list={list}/>}
+            {showSelectBilling===true?<DialogSelectBilling/>:null}
         </div>
     );
 }

@@ -5,7 +5,8 @@ const initialState = {
     //原始数据
     list:[],
     current:null,
-    material:null
+    material:null,
+    withReconCustomer:false,
 }
 
 export const customerSlice = createSlice({
@@ -25,6 +26,9 @@ export const customerSlice = createSlice({
         },
         setMaterial:(state,action) => {
           state.material=action.payload;
+        },
+        setWithReconCustomer:(state,action)=>{
+          state.withReconCustomer=action.payload;
         }
     }
 });
@@ -33,7 +37,8 @@ export const customerSlice = createSlice({
 export const { 
   setCustomerData,
   setCurrentCustomer,
-  setMaterial
+  setMaterial,
+  setWithReconCustomer
 } = customerSlice.actions
 
 export default customerSlice.reducer

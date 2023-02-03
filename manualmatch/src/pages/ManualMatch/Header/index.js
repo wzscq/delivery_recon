@@ -1,8 +1,9 @@
-import { Space,Select,Input, Button } from 'antd';
+import { Space,Select,Input, Button,Checkbox } from 'antd';
+import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetBatch, setCurrentBatch } from '../../../redux/batchSlice';
 
-import {setCurrentCustomer,setMaterial} from '../../../redux/customerSlice';
+import {setCurrentCustomer,setMaterial,setWithReconCustomer} from '../../../redux/customerSlice';
 import {resetData} from '../../../redux/dataSlice';
 
 import './index.css';
@@ -12,9 +13,14 @@ const { Search } = Input;
 
 export default function Header(){
     const dispatch=useDispatch();
-    const {list,current}=useSelector(state=>state.customer);
+    const {list,current,withReconCustomer}=useSelector(state=>state.customer);
     const {list:batchList,current:batchCurrent}=useSelector(state=>state.batch);
     
+    const hasReconCustomer=useMemo(()=>{
+        const currentRow=list.filter(item=>item.id===current)[0];
+        return currentRow?.recon_customer?.list?currentRow.recon_customer.list.length>0:false;
+    },[list,current]);
+
     const optionControls=list.map((item,index)=>{
         return (<Option key={item.id} value={item.id}>{item.name}</Option>);
     });
@@ -36,6 +42,11 @@ export default function Header(){
 
     const onBatchChange=(value)=>{
         dispatch(setCurrentBatch(value));
+        dispatch(resetData());
+    }
+
+    const onChangeWithReconCustomer=(e)=>{
+        dispatch(setWithReconCustomer(e.target.checked));
         dispatch(resetData());
     }
 
@@ -73,6 +84,7 @@ export default function Header(){
                 </Select>
                 <div className="title">物料号:</div>
                 <Search size='small' onSearch={onSearch}/>
+                {hasReconCustomer?<Checkbox checked={withReconCustomer} onChange={onChangeWithReconCustomer}>包含关联客户Billing</Checkbox>:null}
                 <Button type='primary' size='small'>确认</Button>
             </Space>
         </div>

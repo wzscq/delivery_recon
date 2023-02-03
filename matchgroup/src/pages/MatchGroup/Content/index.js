@@ -1,6 +1,11 @@
-import { Table } from 'antd';
+import { Table,Button } from 'antd';
 import { SplitPane } from "react-collapse-pane";
 import { useResizeDetector } from 'react-resize-detector';
+import { useSelector,useDispatch } from 'react-redux';
+import { MinusOutlined,PlusOutlined } from '@ant-design/icons';
+
+import { setDeletedBilling,setShowSelectBilling,setAddedBilling } from '../../../redux/dataSlice';
+
 import './index.css';
 
 const groupColumns=[
@@ -141,100 +146,6 @@ const groupDeliveryColumns=[
     }
 ];
 
-const groupBillingColumns=[
-    {
-        title: '序号',
-        dataIndex: 'sn',
-        key: 'sn',
-        width:70,
-        render:(text)=>{
-            return <div className='row-number'>{text}</div>;
-        }
-    },
-    {
-        title: 'Billing',
-        children: [
-            {
-                title: '单价',
-                dataIndex: 'billing_price',
-                key: 'billing_price',
-                width:100,
-                render:(text)=>{
-                    const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
-                    return <div className='row-number'>{value}</div>;
-                }
-            },
-            {
-                title: '数量',
-                dataIndex: 'billing_quantity',
-                key: 'billing_quantity',
-                width:100,
-                render:(text)=>{
-                    const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
-                    return <div className='row-number'>{value}</div>;
-                }
-            },
-            {
-                title: '金额',
-                dataIndex: 'billing_amount',
-                key: 'billing_amount',
-                width:100,
-                render:(text)=>{
-                    const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
-                    return <div className='row-number'>{value}</div>;
-                }
-            },
-            {
-                title: '调整后单价',
-                dataIndex: 'adjusted_price',
-                key: 'adjusted_price',
-                width:100,
-                render:(text)=>{
-                    const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
-                    return <div className='row-number'>{value}</div>;
-                }
-            },
-            {
-                title: '调整后金额',
-                dataIndex: 'adjusted_amount',
-                key: 'adjusted_amount',
-                width:100,
-                render:(text)=>{
-                    const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
-                    return <div className='row-number'>{value}</div>;
-                }
-            },
-            {
-                title: 'Billing Document',
-                dataIndex: 'billing_document',
-                key: 'billing_document',
-                width:130,
-                render:(text)=>{
-                    return <div >{text}</div>;
-                }
-            },
-            {
-                title: 'Sales Document Type',
-                dataIndex: 'sales_document_type',
-                key: 'sales_document_type',
-                width:160,
-                render:(text)=>{
-                    return <div >{text}</div>;
-                }
-            },
-            {
-                title: '账期',
-                dataIndex: 'period',
-                key: 'period',
-                width:100,
-                render:(text)=>{
-                    return <div >{text}</div>;
-                }
-            }
-        ]
-    }
-];
-
 const adjustmentColumns=[
     {
         dataIndex:"sn",
@@ -244,6 +155,7 @@ const adjustmentColumns=[
             return record.children?null:<div className='row-number'>{index+1}</div>;
         }
     },
+    {dataIndex:"sold_to_party",title:'sold to party',width:120,ellipsis: true},
     {dataIndex:"sales_document_type",title:'Sales DocType',width:120,ellipsis: true},
     {
         dataIndex:"price",
@@ -285,6 +197,136 @@ const adjustmentColumns=[
 export default function Content({list}){
     const { height:heigthLeft,ref:refLeft } = useResizeDetector();
     const { height:heightRight,ref:refRight } = useResizeDetector();
+
+    const {deletedBilling,addedBilling}=useSelector(state=>state.data);
+    const dispatch=useDispatch();
+
+    const removeBilling=(billingRecord)=>{
+        const billingRow=list[0].billings?.list.find(billingRow=>billingRow.id===billingRecord.id);
+        if(billingRow){
+            const newDeletedBilling=[...deletedBilling,billingRow];
+            dispatch(setDeletedBilling(newDeletedBilling));
+        } else {
+            const newAddedBilling=addedBilling.filter(billingRow=>billingRow.id!==billingRecord.id);
+            dispatch(setAddedBilling(newAddedBilling));
+        }
+    }
+
+    const addBilling=()=>{
+        dispatch(setShowSelectBilling(true));
+    }
+
+    const onBillingRow=(record, index)=>{
+        const billingRow=addedBilling.find(billingRow=>billingRow.id===record.id);
+        if(billingRow){
+            return ({
+                style:{backgroundColor:'yellow'}
+            });
+        }
+        return ({
+            style:{backgroundColor:'white'}
+        });
+    }
+
+    const groupBillingColumns=[
+        {
+            title: '序号',
+            dataIndex: 'sn',
+            key: 'sn',
+            width:100,
+            render:(text,record)=>{
+                return (
+                <div className='row-number'>
+                    {text}
+                    {record.children?
+                    <Button onClick={()=>{addBilling()}} size='small' type="text" icon={<PlusOutlined/>} />:
+                    <Button onClick={()=>{removeBilling(record)}} size='small' type="text" icon={<MinusOutlined/>} />}
+                </div>);
+            }
+        },
+        {
+            title: 'Billing',
+            children: [
+                {
+                    title: '单价',
+                    dataIndex: 'billing_price',
+                    key: 'billing_price',
+                    width:100,
+                    render:(text)=>{
+                        const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
+                        return <div className='row-number'>{value}</div>;
+                    }
+                },
+                {
+                    title: '数量',
+                    dataIndex: 'billing_quantity',
+                    key: 'billing_quantity',
+                    width:100,
+                    render:(text)=>{
+                        const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
+                        return <div className='row-number'>{value}</div>;
+                    }
+                },
+                {
+                    title: '金额',
+                    dataIndex: 'billing_amount',
+                    key: 'billing_amount',
+                    width:100,
+                    render:(text)=>{
+                        const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
+                        return <div className='row-number'>{value}</div>;
+                    }
+                },
+                {
+                    title: '调整后单价',
+                    dataIndex: 'adjusted_price',
+                    key: 'adjusted_price',
+                    width:100,
+                    render:(text)=>{
+                        const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
+                        return <div className='row-number'>{value}</div>;
+                    }
+                },
+                {
+                    title: '调整后金额',
+                    dataIndex: 'adjusted_amount',
+                    key: 'adjusted_amount',
+                    width:100,
+                    render:(text)=>{
+                        const value=text?.replace?text.replace(/\B(?=(\d{3})+(?!\d))/g, ','):text;
+                        return <div className='row-number'>{value}</div>;
+                    }
+                },
+                {
+                    title: 'Billing Document',
+                    dataIndex: 'billing_document',
+                    key: 'billing_document',
+                    width:130,
+                    render:(text)=>{
+                        return <div >{text}</div>;
+                    }
+                },
+                {
+                    title: 'Sales Document Type',
+                    dataIndex: 'sales_document_type',
+                    key: 'sales_document_type',
+                    width:160,
+                    render:(text)=>{
+                        return <div >{text}</div>;
+                    }
+                },
+                {
+                    title: '账期',
+                    dataIndex: 'period',
+                    key: 'period',
+                    width:100,
+                    render:(text)=>{
+                        return <div >{text}</div>;
+                    }
+                }
+            ]
+        }
+    ];
 
     //按照物料号统计
     const deliveryMap={};
@@ -334,8 +376,19 @@ export default function Content({list}){
         adjusted_amount:0
     }
 
-    const groupBilling=list[0].billings?.list.map((row,index) => {
-       
+    //过滤掉已经删除的billing，合并添加的billing
+    let billingList=list[0].billings?.list;
+    if(billingList){
+        billingList=[...(billingList.filter(billingRow=>deletedBilling.find(delBilling=>delBilling.id===billingRow.id)?false:true)),...addedBilling];
+    }
+
+    const groupBilling=billingList?.map((row,index) => {
+        //过滤掉已经删除的billing
+        /*const deletedRow=deletedBilling.find(item=>item.id===row.id)
+        if(deletedRow){
+            return undefined;
+        }*/
+
         totalBilling.billing_quantity+=parseFloat(row.quantity);
         totalBilling.billing_amount+=parseFloat(row.amount);
         totalBilling.billing_price=parseFloat(row.price);
@@ -353,11 +406,13 @@ export default function Content({list}){
             sales_document_type:row.sales_document_type,
             adjusted_price:row.adjusted_price,
             adjusted_amount:row.adjusted_amount,
-            period:row.period
+            period:row.period,
+            id:row.id,
+            match_group:row.match_group
         }
 
         return billingRow;
-    });
+    });//.filter(item=>item);
 
     const deliveryMaterials=Object.keys(deliveryMap);
     let totalDeliveryAmount=parseFloat('0.0');
@@ -471,6 +526,7 @@ export default function Content({list}){
                                 scroll={{y: 200,}}
                                 size='small'
                                 bordered
+                                onRow={onBillingRow}
                             />
                         </div>
                     </SplitPane>
