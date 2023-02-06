@@ -149,7 +149,12 @@ var TaxLinkQueryFields = []map[string]interface{}{
 }
 
 var confirmedFilter = map[string]interface{}{
-	"confirmed":"1",
+	"confirmed":map[string]interface{}{
+		"Op.in":[]interface{}{
+			"1",
+			"0",
+		},
+	},
 }
 
 func queryTaxLindData(

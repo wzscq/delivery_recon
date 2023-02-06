@@ -169,7 +169,10 @@ export default function Content({sendMessageToParent,customerID,curentBatch}){
                 responseType:"blob"
             },
             input:{
-                to:"exportCDN"
+                to:"exportCDN",
+                filter:{
+                    import_batch_number:import_batch_number
+                }
             },
             description:"导出CDN"
         }
@@ -186,7 +189,10 @@ export default function Content({sendMessageToParent,customerID,curentBatch}){
                 responseType:"blob"
             },
             input:{
-                to:"exportTaxLink"
+                to:"exportTaxLink",
+                filter:{
+                    import_batch_number:import_batch_number
+                }
             },
             description:"导出CDN"
         }
