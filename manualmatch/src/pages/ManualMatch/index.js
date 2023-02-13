@@ -47,7 +47,10 @@ const deliverFields=[
     {field:"match_status"},
     {field:"match_failure_reason"},
     {field:"set_material"},
-    {field:"delivery_date"}
+    {field:"delivery_date"},
+    {field:'import_batch_number'},
+    {field:'cs_team_id'},
+    {field:"version"}
 ]
 
 const billingFields=[
@@ -61,13 +64,14 @@ const billingFields=[
     {field:"sold_to_party"},
     {field:"material"},
     {field:"customer_material_number"},
-    {field:"billing_date"}
+    {field:"billing_date"},
+    {field:"version"}
 ]
 
 export default function ManualMatch(){
     const sendMessageToParent=useFrame();
     const {origin,item}=useSelector(state=>state.frame);
-    const {deliveryLoaded,billingLoaded,deliveryData,billingData}=useSelector(state=>state.data);
+    const {deliveryLoaded,billingLoaded,deliveryData,billingData,selectedDelivery,selectedBilling}=useSelector(state=>state.data);
     const {loaded:customerLoaded,current,material,list,withReconCustomer}=useSelector(state=>state.customer);
     const {loaded:batchLoaded,current:batchCurrent}=useSelector(state=>state.batch);
 
@@ -205,8 +209,8 @@ export default function ManualMatch(){
         <div className='main'>
             {customerLoaded?(
                 <>
-                    <Header sendMessageToParent={sendMessageToParent} origin={origin} item={item}  />
-                    {deliveryLoaded===true&&billingLoaded===true?<Content deliveryData={deliveryData} billingData={billingData} />:null}
+                    <Header sendMessageToParent={sendMessageToParent} origin={origin} item={item} deliveryData={deliveryData} billingData={billingData} selectedDelivery={selectedDelivery} selectedBilling={selectedBilling}  />
+                    {deliveryLoaded===true&&billingLoaded===true?<Content deliveryData={deliveryData} billingData={billingData} selectedDelivery={selectedDelivery} selectedBilling={selectedBilling} />:null}
                 </>
             ):<PageLoading/>}    
         </div>

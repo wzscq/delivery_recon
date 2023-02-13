@@ -79,7 +79,7 @@ export default function useFrame(){
             }
         } else if (type===FRAME_MESSAGE_TYPE.RELOAD_DATA){
             console.log("reload data");
-            //dispatch(refreshData());
+            dispatch(resetData());
         } else if (type===FRAME_MESSAGE_TYPE.UPDATE_LOCALE){
             console.log("UPDATE_LOCALE",event.data)
             //dispatch(setLocale(event.data.i18n));

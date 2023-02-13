@@ -84,12 +84,25 @@ export default function Header({sendMessageToParent}){
                     },
                     description:"保存对账匹配结果",
                     successOperation:{
-                        type:"reloadFrameData",
+                        type:"request",
                         params:{
-                            location:"modal",
-                            key:"/delivery_recon/matchgroup"
+                            url:"/redirect",
+                            method:"post"
                         },
-                        description:"刷新页面数据"
+                        input:{
+                            to:"processingFlow",
+                            flowID:"delivery_billing_recon_adjust_v2",
+                            filter:{id:list[0].id}
+                        },
+                        description:"更新调差",
+                        successOperation:{
+                            type:"reloadFrameData",
+                            params:{
+                                location:"modal",
+                                key:"/delivery_recon/matchgroup"
+                            },
+                            description:"刷新页面数据"
+                        }
                     }
                 }
             }

@@ -41,7 +41,6 @@ export default function Header(){
             <Space>
                 <Select
                     style={{width:'200px'}}  
-                    allowClear
                     showSearch
                     size='small'
                     disabled={true}
@@ -54,7 +53,6 @@ export default function Header(){
             <Space>
                 <Select
                     style={{width:'200px'}}  
-                    allowClear
                     showSearch
                     value={current}
                     size='small'
@@ -72,7 +70,6 @@ export default function Header(){
             <Space>
                 <Select
                     style={{width:'200px'}}  
-                    allowClear
                     showSearch
                     value={batchCurrent}
                     size='small'

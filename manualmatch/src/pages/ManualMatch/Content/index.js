@@ -1,13 +1,15 @@
 import { Table } from 'antd';
-import { useState } from 'react';
 import { SplitPane } from "react-collapse-pane";
 import { useResizeDetector } from 'react-resize-detector';
 import moment from 'moment';
+import { useMemo } from 'react';
 
 import VirtualTable from '../../../components/VirtualTable';
 import StatusBar from '../StatusBar';
+import {setSelectedDelivery,setSelectedBilling} from '../../../redux/dataSlice';
 
 import './index.css';
+import { useDispatch } from 'react-redux';
 
 const groupDeliveryColumns=[
     {
@@ -100,6 +102,16 @@ const groupDeliveryColumns=[
     }
 ];
 
+/*const groupDeliveryColumns=[
+    {
+        title:"客户对账单",
+        render:(text)=>{
+            return <div >{text}</div>;
+        },
+        children:deliveryColumns
+    }
+]*/
+
 const groupBillingColumns=[
     {
         title: '客户物料号',
@@ -191,37 +203,32 @@ const groupBillingColumns=[
     }
 ];
 
-export default function Content({deliveryData,billingData}){
+export default function Content({deliveryData,billingData,selectedDelivery,selectedBilling}){
     //const { height:heigthLeft,ref:refLeft } = useResizeDetector();
     //const { height:heightRight,ref:refRight } = useResizeDetector();
-
-    console.log("Content Refresh");
+    const dispatch=useDispatch();
+    console.log("Content Refresh",selectedDelivery);
 
     //return (<div>Content</div>);
 
     const { height,ref } = useResizeDetector();
 
-    const [selectedDelivery,setSelectedDelivery]=useState([]);
-    const [selectedBilling,setSelectedBilling]=useState([]);
+    //const [selectedDelivery,setSelectedDelivery]=useState([]);
+    //const [selectedBilling,setSelectedBilling]=useState([]);
     //处理行的选中
-    const onSelectDeliveryChange=selectedRowKeys => {
-        console.log('onSelectDeliveryChange',selectedRowKeys);
-        setSelectedDelivery(selectedRowKeys);
-    };
+    const rowSelectionDelivery = useMemo(()=>{
+        return {
+            selectedRowKeys:selectedDelivery,
+            onChange: (selectedRowKeys)=>{dispatch(setSelectedDelivery(selectedRowKeys))},
+        };
+    },[selectedDelivery,dispatch]);
 
-    const onSelectBillingChange=selectedRowKeys => {
-        setSelectedBilling(selectedRowKeys);
-    };
-
-    const rowSelectionDelivery = {
-        selectedRowKeys:selectedDelivery,
-        onChange: onSelectDeliveryChange,
-    };
-
-    const rowSelectionBilling = {
-        selectedRowKeys:selectedBilling,
-        onChange: onSelectBillingChange,
-    };
+    const rowSelectionBilling = useMemo(()=>{
+        return {
+            selectedRowKeys:selectedBilling,
+            onChange: (selectedRowKeys)=>{dispatch(setSelectedBilling(selectedRowKeys))},
+        };
+    },[selectedBilling,dispatch]);
 
     const getDeliverySummary=()=>{
         return (
@@ -249,7 +256,7 @@ export default function Content({deliveryData,billingData}){
         );
     };
 
-    const scrolly=height-90;
+    const scrolly=height-111;
 
     return (
         <div className='content'>

@@ -90,4 +90,22 @@
 13、修改CDN导出逻辑，增加根据公司+批次号过滤的功能
 14、修改导出TaxLink逻辑，去掉原来需要确认后才能导出的控制
 
+2023-02-09 调整两个对账逻辑
+1、跨公司对账不需要做差异调整、直接在两个公司中做相应数量金额的调整、跨公司不做ZV70
+    这里存在一个疑问，只做跨客户的调整，那么对应的billing就不需要选择，开票和对账过程可能不一致
+    后续沟通后这个逻辑暂时不做修改
+2、dr_console页面上方下拉框禁止清除
+3、手工比对的保存调差功能流程逻辑
+    修改前端页面逻辑
+    增加逻辑处理流程manual_create_match_group
+    增加创建分组的处理逻辑create_match_group,create_set_match_group
+    增加2个调差的处理逻辑delivery_billing_recon_adjust_normal,delivery_billing_recon_adjust_set
+4、修改save_match_group逻辑补充对分组的属性调整和自动更新调差功能  ok
+4、对账单负数情况下对账,
+    增加新的负数订单处理流程negative_delivery_match，本次增加针对退货的匹配使用精确匹配，不需要调差
+    修改流程delivery_billing_recon_v2，首先调用负数订单匹配流程
+4、对账单数量大于billing数量的提醒
+    对于零件数量差异为正数的，可将数据行背景色标识为黄色背景
+    
+
 

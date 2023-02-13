@@ -14,6 +14,8 @@ const initialState = {
         list:[],
         summarize:{}
     },
+    selectedDelivery:[],
+    selectedBilling:[]
 }
 
 export const dataSlice = createSlice({
@@ -25,17 +27,28 @@ export const dataSlice = createSlice({
     
             if(data.modelID==='dr_delivery_recon'){
                  state.deliveryData=data;
+                 state.selectedDelivery=[];
                  state.deliveryLoaded=true;
             }
 
             if(data.modelID==='dr_billing_recon'){
                 state.billingData=data;
+                state.selectedBilling=[];
                 state.billingLoaded=true;
             }
         },
         resetData:(state,action)=>{
             state.deliveryLoaded=false;
             state.billingLoaded=false;
+            state.selectedDelivery=[];
+            state.selectedBilling=[];
+        },
+        setSelectedDelivery:(state,action)=>{
+            console.log('setSelectedDelivery',action.payload);
+            state.selectedDelivery=action.payload;
+        },
+        setSelectedBilling:(state,action)=>{
+            state.selectedBilling=action.payload;
         }
     }
 });
@@ -43,7 +56,9 @@ export const dataSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const { 
     setData,
-    resetData
+    resetData,
+    setSelectedDelivery,
+    setSelectedBilling
 } = dataSlice.actions
 
 export default dataSlice.reducer
