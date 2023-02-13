@@ -101,11 +101,11 @@
     增加创建分组的处理逻辑create_match_group,create_set_match_group
     增加2个调差的处理逻辑delivery_billing_recon_adjust_normal,delivery_billing_recon_adjust_set
 4、修改save_match_group逻辑补充对分组的属性调整和自动更新调差功能  ok
-4、对账单负数情况下对账,
+5、对账单负数情况下对账,
     增加新的负数订单处理流程negative_delivery_match，本次增加针对退货的匹配使用精确匹配，不需要调差
     修改流程delivery_billing_recon_v2，首先调用负数订单匹配流程
-4、对账单数量大于billing数量的提醒
+6、对账单数量大于billing数量的提醒
     对于零件数量差异为正数的，可将数据行背景色标识为黄色背景
-    
+
 
 
