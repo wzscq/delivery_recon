@@ -105,7 +105,7 @@
     增加新的负数订单处理流程negative_delivery_match，本次增加针对退货的匹配使用精确匹配，不需要调差
     修改流程delivery_billing_recon_v2，首先调用负数订单匹配流程
 6、对账单数量大于billing数量的提醒
-    对于零件数量差异为正数的，可将数据行背景色标识为黄色背景
+    对于零件数量差异为正数的，可将数据行背景色标识为黄色背景,调整了dr_delivery_billing_recon_group配置
 
 
 
